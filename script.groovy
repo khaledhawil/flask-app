@@ -42,9 +42,9 @@ def deployApp() {
         
         # Try health check with retries
         echo "Performing health check..."
-        for i in {1..5}; do
+        for i in 1 2 3 4 5; do
             echo "Health check attempt \$i/5"
-            if curl -f http://localhost:5000/health 2>/dev/null; then
+            if curl -f http://localhost:5000 2>/dev/null; then
                 echo "Health check passed!"
                 exit 0
             fi

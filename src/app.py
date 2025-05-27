@@ -24,8 +24,10 @@ def home():
     random_phrase = random.choice(phrases)
     return render_template('index.html', phrase=random_phrase)
 
+
 @app.route('/health')
 def health():
+    print("Health check endpoint accessed!")  # Debug logging
     return {'status': 'healthy', 'message': 'Flask app is running'}, 200
 
 if __name__ == '__main__':
