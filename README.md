@@ -197,9 +197,17 @@ docker run -d \
    - Configure SCM to point to your Git repository
    - Pipeline script from SCM, specify Jenkinsfile
 
-2. **Trigger Build:**
-   - Manual: Click "Build Now"
-   - Automatic: Configure webhooks for Git push events
+2. **Configure GitHub Webhook (Automatic Builds):**
+   - Go to your GitHub repository → Settings → Webhooks
+   - Add webhook: `http://your-jenkins-server/github-webhook/`
+   - Select "Just the push event"
+   - In Jenkins job configuration, check "GitHub hook trigger for GITScm polling"
+
+3. **Trigger Build:**
+   - **Automatic**: Pipeline builds automatically when you push commits to GitHub
+   - **Manual**: Click "Build Now" in Jenkins dashboard
+
+**Note**: The Jenkins pipeline is configured to build and deploy automatically whenever you push new commits to the GitHub repository. This enables continuous integration and deployment (CI/CD) workflow.
 
 ## 🧪 Testing
 
@@ -346,6 +354,8 @@ docker exec flask-app python -c "import sqlite3; print('DB OK')"
 ## 👨‍💻 Author
 
 **Khaled Hawil** - Cloud and DevOps Engineer
+
+**GitHub Repository**: Automatically triggers Jenkins builds on every commit push
 
 ## 📝 License
 
