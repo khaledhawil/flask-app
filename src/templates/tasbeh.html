@@ -5,162 +5,345 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التسبيح الإلكتروني - Tasbeh</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
+        
         body {
-            font-family: 'Arial', 'Tahoma', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Cairo', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             margin: 0;
             min-height: 100vh;
             direction: rtl;
+            position: relative;
+            overflow-x: hidden;
         }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
         .navbar {
-            background-color: rgba(0,0,0,0.8);
-            padding: 1rem;
+            background: linear-gradient(90deg, rgba(0,0,0,0.9), rgba(0,0,0,0.7));
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
             margin-bottom: 30px;
             direction: ltr;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
+        
         .navbar a {
             color: white;
             text-decoration: none;
             margin: 0 15px;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
         }
+        
         .navbar a:hover {
-            background-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
         }
+        
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
+        
         .header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
         }
+        
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        .total-counter {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .total-count {
+            font-family: 'Amiri', serif;
             font-size: 3em;
-            font-weight: bold;
-            color: #fff;
-            margin: 10px 0;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .phrase-container {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            padding: 25px;
-            margin: 20px 0;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
         }
-        .phrase-container:hover {
-            transform: translateY(-5px);
+        
+        .total-counter {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            animation: fadeInUp 1s ease-out 0.2s both;
         }
-        .phrase-text {
+        
+        .total-counter h3 {
+            font-family: 'Amiri', serif;
+            color: white;
             font-size: 1.8em;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+        }
+        
+        .total-count {
+            font-size: 4em;
             font-weight: bold;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .phrase-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            border-radius: 25px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.1),
+                0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .phrase-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .phrase-container:hover::before {
+            left: 100%;
+        }
+        
+        .phrase-container:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.15),
+                0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .phrase-text {
+            font-family: 'Amiri', serif;
+            font-size: 2.2em;
+            font-weight: 700;
             text-align: center;
             color: #2c3e50;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
         }
+        
         .counter-section {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
         }
+        
         .count-display {
-            font-size: 2.5em;
+            font-size: 3em;
             font-weight: bold;
-            color: #27ae60;
-            min-width: 80px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            min-width: 120px;
             text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
+        
         .count-btn {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             border: none;
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
+        
         .count-btn.main {
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, #27ae60, #2ecc71, #58d68d);
             color: white;
-            box-shadow: 0 4px 15px rgba(39,174,96,0.3);
+            box-shadow: 
+                0 8px 25px rgba(39,174,96,0.4),
+                0 2px 8px rgba(39,174,96,0.2);
         }
+        
         .count-btn.main:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(39,174,96,0.4);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 
+                0 12px 35px rgba(39,174,96,0.5),
+                0 5px 15px rgba(39,174,96,0.3);
         }
+        
         .count-btn.main:active {
             transform: scale(0.95);
+            animation: ripple 0.6s ease-out;
         }
+        
         .reset-btn {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: 600;
             transition: all 0.3s ease;
-        }
-        .reset-btn:hover {
-            transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(231,76,60,0.3);
         }
+        
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(231,76,60,0.4);
+        }
+        
         .last-updated {
-            font-size: 12px;
+            font-size: 13px;
             color: #7f8c8d;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
         }
+        
         .loading {
             opacity: 0.6;
             pointer-events: none;
+            transform: scale(0.95);
         }
-        @media (max-width: 600px) {
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes ripple {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255,255,255,0.7);
+            }
+            100% {
+                box-shadow: 0 0 0 20px rgba(255,255,255,0);
+            }
+        }
+        
+        @media (max-width: 768px) {
             .phrase-text {
-                font-size: 1.4em;
+                font-size: 1.8em;
             }
             .count-display {
-                font-size: 2em;
+                font-size: 2.5em;
             }
             .count-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 1.2em;
+                width: 80px;
+                height: 80px;
+                font-size: 1.5em;
             }
+            .total-count {
+                font-size: 3em;
+            }
+            .header h1 {
+                font-size: 2.5em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .counter-section {
+                gap: 20px;
+            }
+            .phrase-container {
+                padding: 20px;
+            }
+        }
+        
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { 
+                transform: scale(1.1); 
+                background: linear-gradient(135deg, #2ecc71, #27ae60, #58d68d);
+            }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
     <nav class="navbar" style="direction: ltr;">
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('my_phrases') }}">My Phrases</a>
-        <a href="{{ url_for('tasbeh') }}">Tasbeh</a>
-        <a href="{{ url_for('prayer_times') }}">Prayer Times</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('home') }}">🏠 Home</a>
+        <a href="{{ url_for('my_phrases') }}">💭 My Phrases</a>
+        <a href="{{ url_for('tasbeh') }}">📿 Tasbeh</a>
+        <a href="{{ url_for('prayer_times') }}">🕌 Prayer Times</a>
+        <a href="{{ url_for('logout') }}">🚪 Logout</a>
     </nav>
 
     <div class="container">
@@ -176,12 +359,12 @@
         </div>
 
         {% for phrase_data in phrases %}
-        <div class="phrase-container">
+        <div class="phrase-container" style="animation-delay: {{ loop.index0 * 0.1 }}s">
             <div class="phrase-text">{{ phrase_data.phrase }}</div>
             
             <div class="counter-section">
-                <button class="reset-btn" onclick="resetCount('{{ phrase_data.phrase }}', this)">
-                    Reset
+                <button class="reset-btn" onclick="resetCount('{{ phrase_data.phrase }}', this, {{ loop.index0 }})">
+                    🔄 Reset
                 </button>
                 
                 <div class="count-display" id="count-{{ loop.index0 }}">
@@ -221,25 +404,37 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById('count-' + index).textContent = data.count;
+                    const countElement = document.getElementById('count-' + index);
+                    countElement.textContent = data.count;
                     updateTotalCount();
                     
-                    // Visual feedback
-                    button.style.transform = 'scale(1.2)';
+                    // Success animation
+                    button.classList.add('success-animation');
+                    countElement.style.transform = 'scale(1.2)';
+                    countElement.style.color = '#27ae60';
+                    
                     setTimeout(() => {
-                        button.style.transform = '';
-                    }, 200);
+                        button.classList.remove('success-animation');
+                        countElement.style.transform = '';
+                        countElement.style.color = '';
+                    }, 600);
+                    
+                    // Play success sound (if audio context exists)
+                    playSuccessSound();
+                } else {
+                    alert('خطأ في التحديث / Error updating count');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                alert('خطأ في الاتصال / Connection error');
             })
             .finally(() => {
                 button.classList.remove('loading');
             });
         }
 
-        function resetCount(phrase, button) {
+        function resetCount(phrase, button, index) {
             if (!confirm('هل أنت متأكد من إعادة تعيين العداد؟\nAre you sure you want to reset this counter?')) {
                 return;
             }
@@ -256,15 +451,22 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Find the count display for this phrase
-                    const container = button.closest('.phrase-container');
-                    const countDisplay = container.querySelector('.count-display');
-                    countDisplay.textContent = '0';
+                    const countElement = document.getElementById('count-' + index);
+                    countElement.textContent = '0';
                     updateTotalCount();
+                    
+                    // Reset animation
+                    countElement.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        countElement.style.transform = '';
+                    }, 300);
+                } else {
+                    alert('خطأ في إعادة التعيين / Error resetting count');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                alert('خطأ في الاتصال / Connection error');
             })
             .finally(() => {
                 button.classList.remove('loading');
@@ -274,18 +476,54 @@
         function updateTotalCount() {
             fetch('/tasbeh/total')
             .then(response => response.json())
-            .then data => {
-                document.getElementById('totalCount').textContent = data.total;
+            .then(data => {
+                const totalElement = document.getElementById('totalCount');
+                totalElement.textContent = data.total;
+                
+                // Animate total count update
+                totalElement.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    totalElement.style.transform = '';
+                }, 300);
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error updating total:', error);
             });
         }
 
-        // Add click sound effect (optional)
-        function playClickSound() {
-            // You can add audio feedback here if desired
+        function playSuccessSound() {
+            try {
+                // Create a simple beep sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Audio not supported, ignore
+            }
         }
+
+        // Auto-save scroll position
+        window.addEventListener('beforeunload', function() {
+            localStorage.setItem('tasbehScrollPosition', window.pageYOffset);
+        });
+
+        window.addEventListener('load', function() {
+            const scrollPosition = localStorage.getItem('tasbehScrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition));
+                localStorage.removeItem('tasbehScrollPosition');
+            }
+        });
     </script>
 </body>
 </html>

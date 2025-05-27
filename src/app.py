@@ -277,20 +277,26 @@ def count_tasbeh():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Insert or update count
-    cursor.execute('''
-        INSERT INTO tasbeh_counts (user_id, phrase, count, last_updated)
-        VALUES (?, ?, 1, CURRENT_TIMESTAMP)
-        ON CONFLICT(user_id, phrase) 
-        DO UPDATE SET 
-            count = count + 1,
-            last_updated = CURRENT_TIMESTAMP
-    ''', (session['user_id'], phrase))
-    
-    # Get updated count
+    # Check if record exists
     cursor.execute('SELECT count FROM tasbeh_counts WHERE user_id = ? AND phrase = ?', 
                    (session['user_id'], phrase))
-    new_count = cursor.fetchone()[0]
+    existing = cursor.fetchone()
+    
+    if existing:
+        # Update existing count
+        new_count = existing[0] + 1
+        cursor.execute('''
+            UPDATE tasbeh_counts 
+            SET count = ?, last_updated = CURRENT_TIMESTAMP 
+            WHERE user_id = ? AND phrase = ?
+        ''', (new_count, session['user_id'], phrase))
+    else:
+        # Insert new record
+        new_count = 1
+        cursor.execute('''
+            INSERT INTO tasbeh_counts (user_id, phrase, count, last_updated)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        ''', (session['user_id'], phrase, new_count))
     
     conn.commit()
     conn.close()
@@ -389,18 +395,23 @@ def set_location():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    cursor.execute('''
-        INSERT INTO user_locations (user_id, city, country, latitude, longitude, timezone, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        ON CONFLICT(user_id) 
-        DO UPDATE SET 
-            city = excluded.city,
-            country = excluded.country,
-            latitude = excluded.latitude,
-            longitude = excluded.longitude,
-            timezone = excluded.timezone,
-            updated_at = CURRENT_TIMESTAMP
-    ''', (session['user_id'], city, country, latitude, longitude, timezone))
+    # Check if user location exists
+    cursor.execute('SELECT id FROM user_locations WHERE user_id = ?', (session['user_id'],))
+    existing = cursor.fetchone()
+    
+    if existing:
+        # Update existing location
+        cursor.execute('''
+            UPDATE user_locations 
+            SET city = ?, country = ?, latitude = ?, longitude = ?, timezone = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+        ''', (city, country, latitude, longitude, timezone, session['user_id']))
+    else:
+        # Insert new location
+        cursor.execute('''
+            INSERT INTO user_locations (user_id, city, country, latitude, longitude, timezone, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ''', (session['user_id'], city, country, latitude, longitude, timezone))
     
     conn.commit()
     conn.close()
