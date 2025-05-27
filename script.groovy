@@ -21,11 +21,16 @@ def deployApp() {
         docker stop flask-app || true
         docker rm flask-app || true
         
-        # Deploy new container
+        # Create volume for database persistence
+        docker volume create flask_data || true
+        
+        # Deploy new container with database volume
         docker run -d \\
             -p 5000:5000 \\
             --name flask-app \\
             --restart unless-stopped \\
+            -v flask_data:/app/data \\
+            -e SECRET_KEY=production-secret-key-${BUILD_NUMBER} \\
             khaledhawil/flask-app:${BUILD_NUMBER}
         
         echo "Container deployed successfully!"

@@ -9,7 +9,9 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
 # Database initialization
 def init_db():
-    conn = sqlite3.connect('app.db')
+    # Use persistent data directory
+    db_path = '/app/data/app.db' if os.path.exists('/app/data') else 'app.db'
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     # Users table
@@ -53,11 +55,15 @@ default_phrases = [
     "The only way to learn programming is by writing programs."
 ]
 
+def get_db_connection():
+    db_path = '/app/data/app.db' if os.path.exists('/app/data') else 'app.db'
+    return sqlite3.connect(db_path)
+
 @app.route('/')
 def home():
     if 'user_id' in session:
         # Get user's custom phrases
-        conn = sqlite3.connect('app.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT phrase FROM user_phrases WHERE user_id = ?', (session['user_id'],))
         user_phrases = [row[0] for row in cursor.fetchall()]
@@ -83,7 +89,7 @@ def signup():
             flash('All fields are required!', 'error')
             return render_template('signup.html')
         
-        conn = sqlite3.connect('app.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # Check if user exists
@@ -111,7 +117,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
-        conn = sqlite3.connect('app.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT id, username, password_hash FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
@@ -138,7 +144,7 @@ def my_phrases():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    conn = sqlite3.connect('app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT id, phrase, created_at FROM user_phrases WHERE user_id = ? ORDER BY created_at DESC', 
                    (session['user_id'],))
@@ -157,7 +163,7 @@ def add_phrase():
         flash('Phrase cannot be empty!', 'error')
         return redirect(url_for('my_phrases'))
     
-    conn = sqlite3.connect('app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('INSERT INTO user_phrases (user_id, phrase) VALUES (?, ?)', 
                    (session['user_id'], phrase))
@@ -172,7 +178,7 @@ def delete_phrase(phrase_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    conn = sqlite3.connect('app.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('DELETE FROM user_phrases WHERE id = ? AND user_id = ?', 
                    (phrase_id, session['user_id']))
