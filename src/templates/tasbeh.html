@@ -258,6 +258,44 @@
             transform: scale(0.95);
         }
         
+        .islamic-reminder {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        .dua-section {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1));
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .dua-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.4em;
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        .hadith-quote {
+            font-size: 0.9em;
+            opacity: 0.8;
+            font-style: italic;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -352,10 +390,24 @@
             <p>Digital Tasbeh for {{ username }}</p>
         </div>
 
+        <div class="islamic-reminder">
+            <h4>🤲 فضل الذكر</h4>
+            <p>"الذين آمنوا وتطمئن قلوبهم بذكر الله ألا بذكر الله تطمئن القلوب"</p>
+            <p>"Those who believe and whose hearts are assured by the remembrance of Allah"</p>
+        </div>
+
         <div class="total-counter">
             <h3>إجمالي التسبيحات</h3>
             <div class="total-count" id="totalCount">0</div>
             <p>Total Dhikr Count</p>
+        </div>
+
+        <div class="dua-section">
+            <h4>🤲 دعاء بعد التسبيح</h4>
+            <div class="dua-text">
+                "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ"
+            </div>
+            <p>"Our Lord, give us good in this world and good in the next world, and save us from the punishment of the Fire"</p>
         </div>
 
         {% for phrase_data in phrases %}
@@ -381,6 +433,18 @@
                 آخر تحديث: {{ phrase_data.last_updated }}
             </div>
             {% endif %}
+            
+            <div class="hadith-quote">
+                {% if phrase_data.phrase == "سبحان الله" %}
+                    "من قال سبحان الله وبحمده في يوم مائة مرة حطت خطاياه"
+                {% elif phrase_data.phrase == "الحمد لله" %}
+                    "الحمد لله تملأ الميزان"
+                {% elif phrase_data.phrase == "الله أكبر" %}
+                    "التكبير يملأ ما بين السماء والأرض"
+                {% elif phrase_data.phrase == "لا إله إلا الله" %}
+                    "أفضل الذكر لا إله إلا الله"
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -476,7 +540,7 @@
         function updateTotalCount() {
             fetch('/tasbeh/total')
             .then(response => response.json())
-            .then(data => {
+            .then data => {
                 const totalElement = document.getElementById('totalCount');
                 totalElement.textContent = data.total;
                 
