@@ -8,8 +8,27 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 100px;
+            margin: 0;
             background-color: #f0f0f0;
+        }
+        .navbar {
+            background-color: #333;
+            padding: 1rem;
+            margin-bottom: 50px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+        .navbar a:hover {
+            background-color: #555;
+        }
+        .user-info {
+            color: white;
+            float: right;
         }
         .phrase-container {
             background-color: white;
@@ -37,11 +56,56 @@
         .reload-btn:hover {
             background-color: #0056b3;
         }
+        .flash-messages {
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}">Home</a>
+        {% if username %}
+            <a href="{{ url_for('my_phrases') }}">My Phrases</a>
+            <div class="user-info">
+                Welcome, {{ username }}! | 
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('signup') }}">Sign Up</a>
+        {% endif %}
+    </nav>
+
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
     <div class="phrase-container">
         <h1>Welcome to Flask App!</h1>
+        {% if username %}
+            <p>Showing your personalized phrases</p>
+        {% endif %}
         <div class="phrase">{{ phrase }}</div>
         <button class="reload-btn" onclick="location.reload()">Get New Phrase</button>
     </div>

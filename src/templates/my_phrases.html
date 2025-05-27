@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Phrases - Flask App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .navbar {
+            background-color: #333;
+            padding: 1rem;
+            margin-bottom: 30px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+        .navbar a:hover {
+            background-color: #555;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .add-phrase-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .phrase-list {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .phrase-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .phrase-text {
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        .phrase-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            float: right;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('my_phrases') }}">My Phrases</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+
+    <div class="container">
+        <h1>My Personal Phrases</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="add-phrase-form">
+            <h3>Add New Phrase</h3>
+            <form method="POST" action="{{ url_for('add_phrase') }}">
+                <textarea name="phrase" placeholder="Enter your motivational phrase here..." required></textarea>
+                <br><br>
+                <button type="submit" class="btn">Add Phrase</button>
+            </form>
+        </div>
+
+        <div class="phrase-list">
+            <h3>Your Phrases ({{ phrases|length }})</h3>
+            {% if phrases %}
+                {% for phrase in phrases %}
+                    <div class="phrase-item">
+                        <a href="{{ url_for('delete_phrase', phrase_id=phrase[0]) }}" 
+                           class="delete-btn" 
+                           onclick="return confirm('Are you sure you want to delete this phrase?')">Delete</a>
+                        <div class="phrase-text">{{ phrase[1] }}</div>
+                        <div class="phrase-meta">Added on {{ phrase[2] }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>You haven't added any phrases yet. Add your first phrase above!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

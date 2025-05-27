@@ -36,7 +36,7 @@ def cleanup() {
     echo 'cleaning up old images...'
     sh '''
         # Keep only last 5 images
-        docker images khaledhawil/flask-app --format "{{.Tag}}" | grep -v latest | tail -n +6 | xargs -I {} docker rmi khaledhawil/flask-app:{} || true
+        docker images khaledhawil/flask-app --format "{{.Tag}}" | grep -v latest | tail -n +2 | xargs -I {} docker rmi khaledhawil/flask-app:{} || true
     '''
 }
 
