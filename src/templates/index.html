@@ -1,116 +1,792 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App with Random Phrases</title>
+    <title>التطبيق الإسلامي الشامل - Islamic App</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Scheherazade+New:wght@400;700&display=swap');
+        
+        * {
             margin: 0;
-            background-color: #f0f0f0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Cairo', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #334155 70%, #475569 100%);
+            margin: 0;
+            min-height: 100vh;
+            direction: rtl;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            z-index: -2;
+        }
+        
+        .islamic-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,215,0,0.03) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(255,215,0,0.03) 2px, transparent 2px);
+            background-size: 80px 80px;
+            z-index: -1;
+        }
+        
         .navbar {
-            background-color: #333;
-            padding: 1rem;
-            margin-bottom: 50px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.95), rgba(0,0,0,0.8));
+            backdrop-filter: blur(20px);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            border-bottom: 2px solid rgba(255,215,0,0.3);
         }
+        
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            direction: ltr;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+        
         .navbar a {
             color: white;
             text-decoration: none;
-            margin: 0 15px;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+        
         .navbar a:hover {
-            background-color: #555;
+            background: rgba(255,215,0,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,215,0,0.3);
+            border-color: rgba(255,215,0,0.4);
         }
+        
         .user-info {
-            color: white;
-            float: right;
+            color: #ffd700;
+            font-weight: 600;
         }
-        .phrase-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+        
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
         }
-        .phrase {
-            font-size: 24px;
-            color: #333;
-            font-style: italic;
+        
+        .hero-section {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            animation: fadeInDown 1s ease-out;
         }
-        .reload-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
+        
+        .hero-section h1 {
+            font-family: 'Amiri', serif;
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.7);
+            background: linear-gradient(45deg, #ffd700, #ffed4a, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .phrase-display {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255,215,0,0.3);
+            padding: 40px;
+            border-radius: 30px;
+            margin: 30px 0;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        
+        .phrase-text {
+            font-family: 'Amiri', serif;
+            font-size: 2.5em;
+            line-height: 1.6;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            padding: 15px 30px;
+            border-radius: 25px;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
         }
-        .reload-btn:hover {
-            background-color: #0056b3;
+        
+        .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(34, 197, 94, 0.6);
         }
-        .flash-messages {
-            margin: 20px auto;
-            max-width: 600px;
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
         }
-        .flash-success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+        
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            border-radius: 25px;
+            padding: 35px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            border: 2px solid rgba(255,215,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
-        .flash-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+            transition: left 0.8s ease;
+        }
+        
+        .feature-card:hover::before {
+            left: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            border-color: rgba(255,215,0,0.4);
+        }
+        
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,215,0,0.2);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .feature-title {
+            font-family: 'Amiri', serif;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        /* Tasbeh Counter Styles */
+        .tasbeh-counter {
+            text-align: center;
+        }
+        
+        .total-dhikr {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .total-count {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #22c55e, #16a34a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s infinite;
+        }
+        
+        .dhikr-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .dhikr-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 15px 10px;
+            border-radius: 15px;
+            font-family: 'Amiri', serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .dhikr-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .dhikr-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Prayer Times Styles */
+        .prayer-times-mini {
+            text-align: center;
+        }
+        
+        .prayer-grid-mini {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .prayer-item-mini {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .prayer-name-mini {
+            font-family: 'Amiri', serif;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .prayer-time-mini {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        /* Quran Styles */
+        .quran-section {
+            text-align: center;
+        }
+        
+        .verse-mini {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05));
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        
+        .verse-arabic-mini {
+            font-family: 'Scheherazade New', serif;
+            font-size: 1.6em;
+            color: #1f2937;
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        
+        .verse-translation-mini {
+            font-size: 1em;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        .audio-controls-mini {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .play-btn-mini {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .play-btn-mini:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Phrases Management */
+        .phrases-section {
+            text-align: center;
+        }
+        
+        .add-phrase-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .phrase-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .phrases-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .phrase-item {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .section-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            color: #1f2937;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .section-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-section h1 {
+                font-size: 2.5em;
+            }
+            .phrase-text {
+                font-size: 1.8em;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .navbar a {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="islamic-pattern"></div>
+    
     <nav class="navbar">
-        <a href="{{ url_for('home') }}">Home</a>
-        {% if username %}
-            <a href="{{ url_for('my_phrases') }}">My Phrases</a>
-            <a href="{{ url_for('tasbeh') }}">Tasbeh</a>
-            <a href="{{ url_for('prayer_times') }}">Prayer Times</a>
-            <a href="{{ url_for('quran') }}">📖 Quran</a>
-            <div class="user-info">
-                Welcome, {{ username }}! | 
-                <a href="{{ url_for('logout') }}">Logout</a>
+        <div class="navbar-content">
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">🏠 الرئيسية</a>
+                {% if username %}
+                    <a href="#tasbeh">📿 التسبيح</a>
+                    <a href="#prayer-times">🕌 الصلاة</a>
+                    <a href="#quran">📖 القرآن</a>
+                    <a href="#phrases">💭 العبارات</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">🔐 تسجيل الدخول</a>
+                    <a href="{{ url_for('signup') }}">📝 إنشاء حساب</a>
+                {% endif %}
             </div>
-        {% else %}
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('signup') }}">Sign Up</a>
-        {% endif %}
+            {% if username %}
+            <div class="user-info">
+                مرحباً {{ username }} | 
+                <a href="{{ url_for('logout') }}" style="color: #ffd700;">خروج</a>
+            </div>
+            {% endif %}
+        </div>
     </nav>
 
-    <div class="flash-messages">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    <div class="container">
+        <div class="hero-section">
+            <h1>🕌 التطبيق الإسلامي الشامل</h1>
+            <p style="font-size: 1.3em; margin-bottom: 20px;">
+                تطبيق متكامل للذكر والصلاة والقرآن الكريم
+            </p>
+            <p style="font-size: 1.1em; opacity: 0.9;">
+                "وَاذْكُر رَّبَّكَ فِي نَفْسِكَ تَضَرُّعًا وَخِيفَةً"
+            </p>
+        </div>
+
+        {% if username %}
+        <div class="phrase-display">
+            <div class="phrase-text" id="currentPhrase">{{ phrase }}</div>
+            <button class="refresh-btn" onclick="refreshPhrase()">
+                🔄 عبارة جديدة
+            </button>
+        </div>
+
+        <div class="features-grid">
+            <!-- Tasbeh Counter -->
+            <div class="feature-card" id="tasbeh">
+                <div class="feature-header">
+                    <div class="feature-icon">📿</div>
+                    <div class="feature-title">التسبيح الإلكتروني</div>
+                </div>
+                <div class="tasbeh-counter">
+                    <div class="total-dhikr">
+                        <h4>إجمالي التسبيحات</h4>
+                        <div class="total-count" id="totalDhikr">0</div>
+                    </div>
+                    <div class="dhikr-buttons">
+                        <button class="dhikr-btn" onclick="incrementDhikr('سبحان الله')">
+                            سبحان الله
+                        </button>
+                        <button class="dhikr-btn" onclick="incrementDhikr('الحمد لله')">
+                            الحمد لله
+                        </button>
+                        <button class="dhikr-btn" onclick="incrementDhikr('الله أكبر')">
+                            الله أكبر
+                        </button>
+                        <button class="dhikr-btn" onclick="incrementDhikr('لا إله إلا الله')">
+                            لا إله إلا الله
+                        </button>
+                    </div>
+                    <a href="{{ url_for('tasbeh') }}" class="section-link">
+                        📿 صفحة التسبيح الكاملة
+                    </a>
+                </div>
+            </div>
+
+            <!-- Prayer Times -->
+            <div class="feature-card" id="prayer-times">
+                <div class="feature-header">
+                    <div class="feature-icon">🕌</div>
+                    <div class="feature-title">مواقيت الصلاة</div>
+                </div>
+                <div class="prayer-times-mini">
+                    <div id="prayerTimesContent">
+                        <p style="color: #6b7280;">يرجى تحديد موقعك لعرض المواقيت</p>
+                    </div>
+                    <a href="{{ url_for('prayer_times') }}" class="section-link">
+                        🕌 صفحة المواقيت الكاملة
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quran -->
+            <div class="feature-card" id="quran">
+                <div class="feature-header">
+                    <div class="feature-icon">📖</div>
+                    <div class="feature-title">القرآن الكريم</div>
+                </div>
+                <div class="quran-section">
+                    <div style="font-family: 'Scheherazade New', serif; font-size: 2em; color: #ffd700; margin-bottom: 15px;">
+                        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                    </div>
+                    <div class="verse-mini">
+                        <div class="verse-arabic-mini">فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</div>
+                        <div class="verse-translation-mini">For indeed, with hardship comes ease</div>
+                    </div>
+                    <div class="audio-controls-mini">
+                        <button class="play-btn-mini" onclick="toggleQuranAudio()">
+                            ▶️
+                        </button>
+                        <audio id="quranAudioMini" preload="none">
+                            <source src="https://server8.mp3quran.net/ahmad_nu3man/001.mp3" type="audio/mpeg">
+                        </audio>
+                    </div>
+                    <a href="{{ url_for('quran') }}" class="section-link">
+                        📖 صفحة القرآن الكاملة
+                    </a>
+                </div>
+            </div>
+
+            <!-- My Phrases -->
+            <div class="feature-card" id="phrases">
+                <div class="feature-header">
+                    <div class="feature-icon">💭</div>
+                    <div class="feature-title">عباراتي المحفوظة</div>
+                </div>
+                <div class="phrases-section">
+                    <form class="add-phrase-form" onsubmit="addPhrase(event)">
+                        <input type="text" class="phrase-input" placeholder="أضف عبارة جديدة..." required>
+                        <button type="submit" class="add-btn">إضافة</button>
+                    </form>
+                    <div class="phrases-list" id="phrasesList">
+                        <!-- Phrases will be loaded here -->
+                    </div>
+                    <a href="{{ url_for('my_phrases') }}" class="section-link">
+                        💭 صفحة العبارات الكاملة
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="phrase-display">
+            <div class="phrase-text">{{ phrase }}</div>
+            <button class="refresh-btn" onclick="refreshPhrase()">
+                🔄 عبارة جديدة
+            </button>
+        </div>
+        
+        <div style="text-align: center; margin: 40px 0;">
+            <h3 style="color: white; margin-bottom: 20px;">انضم إلينا للاستفادة من جميع الميزات</h3>
+            <a href="{{ url_for('signup') }}" class="section-link" style="margin: 0 10px;">
+                📝 إنشاء حساب جديد
+            </a>
+            <a href="{{ url_for('login') }}" class="section-link" style="margin: 0 10px;">
+                🔐 تسجيل الدخول
+            </a>
+        </div>
+        {% endif %}
     </div>
 
-    <div class="phrase-container">
-        <h1>Welcome to Flask App!</h1>
-        {% if username %}
-            <p>Showing your personalized phrases</p>
-        {% endif %}
-        <div class="phrase">{{ phrase }}</div>
-        <button class="reload-btn" onclick="location.reload()">Get New Phrase</button>
-    </div>
+    <script>
+        let isPlayingQuran = false;
+
+        // Refresh phrase function
+        function refreshPhrase() {
+            location.reload();
+        }
+
+        // Dhikr counter functions
+        function incrementDhikr(phrase) {
+            fetch('/tasbeh/count', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({phrase: phrase})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateTotalDhikr();
+                    // Visual feedback
+                    event.target.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        event.target.style.transform = '';
+                    }, 200);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateTotalDhikr() {
+            fetch('/tasbeh/total')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalDhikr').textContent = data.total;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Quran audio functions
+        function toggleQuranAudio() {
+            const audio = document.getElementById('quranAudioMini');
+            const btn = event.target;
+            
+            if (isPlayingQuran) {
+                audio.pause();
+                btn.innerHTML = '▶️';
+                isPlayingQuran = false;
+            } else {
+                audio.play().then(() => {
+                    btn.innerHTML = '⏸️';
+                    isPlayingQuran = true;
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                });
+            }
+        }
+
+        // Phrases functions
+        function addPhrase(event) {
+            event.preventDefault();
+            const input = event.target.querySelector('.phrase-input');
+            const phrase = input.value.trim();
+            
+            if (!phrase) return;
+            
+            const formData = new FormData();
+            formData.append('phrase', phrase);
+            
+            fetch('/add-phrase', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    input.value = '';
+                    loadPhrases();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function loadPhrases() {
+            // This would require a new endpoint to get phrases as JSON
+            // For now, we'll skip this implementation
+        }
+
+        function loadPrayerTimes() {
+            fetch('/get-prayer-times-api')
+            .then(response => response.json())
+            .then(data => {
+                if (data.Fajr) {
+                    const content = `
+                        <div class="prayer-grid-mini">
+                            <div class="prayer-item-mini">
+                                <div class="prayer-name-mini">الفجر</div>
+                                <div class="prayer-time-mini">${data.Fajr}</div>
+                            </div>
+                            <div class="prayer-item-mini">
+                                <div class="prayer-name-mini">الظهر</div>
+                                <div class="prayer-time-mini">${data.Dhuhr}</div>
+                            </div>
+                            <div class="prayer-item-mini">
+                                <div class="prayer-name-mini">العصر</div>
+                                <div class="prayer-time-mini">${data.Asr}</div>
+                            </div>
+                            <div class="prayer-item-mini">
+                                <div class="prayer-name-mini">المغرب</div>
+                                <div class="prayer-time-mini">${data.Maghrib}</div>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('prayerTimesContent').innerHTML = content;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading prayer times:', error);
+            });
+        }
+
+        // Initialize page
+        window.onload = function() {
+            {% if username %}
+            updateTotalDhikr();
+            loadPrayerTimes();
+            {% endif %}
+        };
+
+        // Audio event listeners
+        document.getElementById('quranAudioMini')?.addEventListener('ended', function() {
+            document.querySelector('.play-btn-mini').innerHTML = '▶️';
+            isPlayingQuran = false;
+        });
+    </script>
 </body>
 </html>
