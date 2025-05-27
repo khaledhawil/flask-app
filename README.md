@@ -345,7 +345,7 @@ docker exec flask-app python -c "import sqlite3; print('DB OK')"
 
 ## 👨‍💻 Author
 
-**Khaled Hawil** - DevOps Engineer
+**Khaled Hawil** - Cloud and  DevOps Engineer
 
 ## 📝 License
 
