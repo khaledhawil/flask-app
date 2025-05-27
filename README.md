@@ -1,11 +1,14 @@
 # Flask App with Jenkins CI/CD Pipeline
 
-A simple Flask web application that displays random motivational phrases on each page reload, integrated with Jenkins for automated build, test, and deployment using Docker.
+A Flask web application with user authentication that displays personalized motivational phrases. Users can create accounts, log in, and manage their own custom phrases. The app is integrated with Jenkins for automated build, test, and deployment using Docker.
 
 ## 🚀 Features
 
-- **Random Phrase Generator**: Displays inspirational quotes on each page refresh
-- **Dockerized Application**: Containerized Flask app for consistent deployments
+- **User Authentication**: Secure registration and login system
+- **Personalized Phrases**: Each user can create and manage their own motivational quotes
+- **Random Phrase Generator**: Displays user's custom phrases or default inspirational quotes
+- **SQLite Database**: Persistent storage for user accounts and phrases
+- **Dockerized Application**: Containerized Flask app with database persistence
 - **Jenkins CI/CD Pipeline**: Automated build, test, and deployment pipeline
 - **Docker Hub Integration**: Automatic image push to Docker registry
 - **Health Checks**: Automated health monitoring after deployment
@@ -23,10 +26,14 @@ A simple Flask web application that displays random motivational phrases on each
 ```
 flask-app/
 ├── src/
-│   ├── app.py                 # Main Flask application
+│   ├── app.py                 # Main Flask application with auth
 │   └── templates/
-│       └── index.html         # HTML template
+│       ├── index.html         # Home page template
+│       ├── login.html         # Login page template
+│       ├── signup.html        # Registration page template
+│       └── my_phrases.html    # Phrase management page
 ├── Dockerfile                 # Docker image configuration
+├── docker-compose.yml         # Docker Compose for local development
 ├── requirements.txt           # Python dependencies
 ├── Jenkinsfile               # Jenkins pipeline configuration
 ├── script.groovy             # Reusable Jenkins functions
@@ -35,7 +42,22 @@ flask-app/
 
 ## 🐳 Local Development
 
-### Option 1: Using Virtual Environment
+### Option 1: Using Docker Compose (Recommended)
+
+1. **Start the application:**
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Access the app:**
+   Open your browser and go to `http://localhost:5000`
+
+3. **Stop the application:**
+   ```bash
+   docker-compose down
+   ```
+
+### Option 2: Using Virtual Environment
 
 1. **Create and activate virtual environment:**
    ```bash
@@ -56,20 +78,47 @@ flask-app/
 4. **Access the app:**
    Open your browser and go to `http://localhost:5000`
 
-### Option 2: Using Docker
+### Option 3: Using Docker
 
 1. **Build the Docker image:**
    ```bash
    docker build -t flask-app .
    ```
 
-2. **Run the container:**
+2. **Create a volume for database persistence:**
    ```bash
-   docker run -p 5000:5000 flask-app
+   docker volume create flask_data
    ```
 
-3. **Access the app:**
+3. **Run the container:**
+   ```bash
+   docker run -d \
+     -p 5000:5000 \
+     -v flask_data:/app/data \
+     --name flask-app \
+     flask-app
+   ```
+
+4. **Access the app:**
    Open your browser and go to `http://localhost:5000`
+
+## 👤 User Features
+
+### Authentication System
+- **Sign Up**: Create a new account with username, email, and password
+- **Login**: Secure authentication with session management
+- **Logout**: Clean session termination
+
+### Phrase Management
+- **View Phrases**: Display personalized phrases for logged-in users
+- **Add Phrases**: Create custom motivational quotes
+- **Delete Phrases**: Remove unwanted phrases
+- **Default Phrases**: Anonymous users see predefined inspirational quotes
+
+### Navigation
+- **Home**: Main page with random phrase display
+- **My Phrases**: Personal phrase management dashboard
+- **User Menu**: Login/logout and navigation options
 
 ## 🔧 Jenkins Pipeline Setup
 
@@ -94,8 +143,9 @@ The Jenkins pipeline includes the following stages:
 
 - **Deploy**: 
   - Stops existing container
+  - Creates persistent volume for database
   - Deploys new container with latest image
-  - Performs health check
+  - Configures environment variables
 
 - **Cleanup**: 
   - Removes old Docker images (keeps last 5)
@@ -111,8 +161,9 @@ The Jenkins pipeline includes the following stages:
 
 #### `deployApp()`
 - Stops and removes existing container
+- Creates Docker volume for database persistence
 - Deploys new container with restart policy
-- Performs health check via curl
+- Sets environment variables for production
 
 #### `cleanup()`
 - Maintains only the latest 5 Docker images
@@ -123,13 +174,18 @@ The Jenkins pipeline includes the following stages:
 ### Manual Deployment
 
 ```bash
+# Create volume for database
+docker volume create flask_data
+
 # Build and tag image
 docker build -t khaledhawil/flask-app:latest .
 
-# Run container
+# Run container with persistence
 docker run -d \
   --name flask-app \
   -p 5000:5000 \
+  -v flask_data:/app/data \
+  -e SECRET_KEY=your-secret-key \
   --restart unless-stopped \
   khaledhawil/flask-app:latest
 ```
@@ -147,24 +203,42 @@ docker run -d \
 
 ## 🧪 Testing
 
-### Health Check Endpoint
+### Application Features
 
-The application automatically performs health checks on deployment:
-
-```bash
-curl -f http://localhost:5000
-```
-
-### Manual Testing
-
-1. **Access the application:**
+1. **Anonymous Access:**
    ```
    http://localhost:5000
    ```
+   - Should display default motivational phrases
+   - Refresh to see different quotes
 
-2. **Verify random phrases:**
-   - Refresh the page multiple times
-   - Each reload should display a different motivational quote
+2. **User Registration:**
+   ```
+   http://localhost:5000/signup
+   ```
+   - Create a new account
+   - Verify email validation
+
+3. **User Login:**
+   ```
+   http://localhost:5000/login
+   ```
+   - Login with created credentials
+   - Verify session management
+
+4. **Phrase Management:**
+   ```
+   http://localhost:5000/my-phrases
+   ```
+   - Add custom phrases
+   - Delete unwanted phrases
+   - Verify persistence after container restart
+
+### Health Check Endpoint
+
+```bash
+curl -f http://localhost:5000/health
+```
 
 ## 📊 Monitoring
 
@@ -179,6 +253,22 @@ docker logs flask-app
 
 # Monitor resource usage
 docker stats flask-app
+
+# Check database volume
+docker volume inspect flask_data
+```
+
+### Database Management
+
+```bash
+# Access container shell
+docker exec -it flask-app /bin/bash
+
+# Check database file
+ls -la /app/data/
+
+# View database tables (if sqlite3 is installed)
+sqlite3 /app/data/app.db ".tables"
 ```
 
 ### Jenkins Build Status
@@ -189,10 +279,12 @@ docker stats flask-app
 
 ## 🔒 Security
 
-- Docker Hub credentials stored securely in Jenkins
-- Container runs with restart policy for availability
-- Regular cleanup prevents resource exhaustion
-- Health checks ensure service reliability
+- **Password Hashing**: Secure password storage using Werkzeug
+- **Session Management**: Flask session handling
+- **Docker Hub Credentials**: Stored securely in Jenkins
+- **Database Isolation**: SQLite database in persistent volume
+- **Environment Variables**: Secure secret key management
+- **Container Security**: Restart policy for availability
 
 ## 🐛 Troubleshooting
 
@@ -204,15 +296,25 @@ docker stats flask-app
    docker rm flask-app
    ```
 
-2. **Build failures:**
+2. **Database issues:**
+   ```bash
+   # Check database volume
+   docker volume inspect flask_data
+   
+   # Reset database (WARNING: deletes all data)
+   docker volume rm flask_data
+   docker volume create flask_data
+   ```
+
+3. **Build failures:**
    - Check Docker daemon is running
    - Verify Docker Hub credentials
    - Review Jenkins console output
 
-3. **Health check failures:**
-   - Ensure Flask app binds to 0.0.0.0:5000
-   - Check container networking
-   - Verify port mappings
+4. **Authentication issues:**
+   - Clear browser cookies/session
+   - Check container logs for errors
+   - Verify database initialization
 
 ### Debug Commands
 
@@ -223,6 +325,12 @@ docker logs flask-app
 # Access container shell
 docker exec -it flask-app /bin/bash
 
+# Check database file
+docker exec flask-app ls -la /app/data/
+
+# Test database connection
+docker exec flask-app python -c "import sqlite3; print('DB OK')"
+
 # Check Jenkins pipeline logs
 # Go to Jenkins → Job → Build History → Console Output
 ```
@@ -232,7 +340,7 @@ docker exec -it flask-app /bin/bash
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test locally
+4. Test locally with docker-compose
 5. Submit a pull request
 
 ## 👨‍💻 Author
@@ -249,6 +357,7 @@ For issues and questions:
 - Check the troubleshooting section
 - Review Jenkins console logs
 - Create an issue in the repository
+- Test with docker-compose for local debugging
 
 ---
 
