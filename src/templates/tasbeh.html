@@ -381,6 +381,7 @@
         <a href="{{ url_for('my_phrases') }}">💭 My Phrases</a>
         <a href="{{ url_for('tasbeh') }}">📿 Tasbeh</a>
         <a href="{{ url_for('prayer_times') }}">🕌 Prayer Times</a>
+        <a href="{{ url_for('quran') }}">📖 Quran</a>
         <a href="{{ url_for('logout') }}">🚪 Logout</a>
     </nav>
 
@@ -540,7 +541,7 @@
         function updateTotalCount() {
             fetch('/tasbeh/total')
             .then(response => response.json())
-            .then(data => {
+            .then data => {
                 const totalElement = document.getElementById('totalCount');
                 totalElement.textContent = data.total;
                 

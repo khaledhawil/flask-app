@@ -382,7 +382,31 @@
             <h3>📍 الموقع الحالي</h3>
             <p><strong>{{ location.city }}, {{ location.country }}</strong></p>
             <button class="location-btn" onclick="showEgyptLocations()">🇪🇬 اختيار مدينة مصرية أخرى</button>
-            <button class="location-btn" onclick="updateLocation()">🔄 تحديث الموقع</button>
+            <button class="location-btn" onclick="getLocation()">🔄 تحديث الموقع</button>
+            
+            <!-- Hidden Egypt locations for updating -->
+            <div class="egypt-locations" id="egyptLocationsUpdate" style="display: none; margin-top: 20px;">
+                <button class="location-btn" onclick="setEgyptLocation('القاهرة', 'مصر', 30.0444, 31.2357)">🏛️ القاهرة</button>
+                <button class="location-btn" onclick="setEgyptLocation('الإسكندرية', 'مصر', 31.2001, 29.9187)">🌊 الإسكندرية</button>
+                <button class="location-btn" onclick="setEgyptLocation('الجيزة', 'مصر', 30.0131, 31.2089)">🔺 الجيزة</button>
+                <button class="location-btn" onclick="setEgyptLocation('شرم الشيخ', 'مصر', 27.9158, 34.3300)">🏖️ شرم الشيخ</button>
+                <button class="location-btn" onclick="setEgyptLocation('الغردقة', 'مصر', 27.2574, 33.8129)">🤿 الغردقة</button>
+                <button class="location-btn" onclick="setEgyptLocation('الأقصر', 'مصر', 25.6872, 32.6396)">🏺 الأقصر</button>
+                <button class="location-btn" onclick="setEgyptLocation('أسوان', 'مصر', 24.0889, 32.8998)">⛵ أسوان</button>
+                <button class="location-btn" onclick="setEgyptLocation('المنصورة', 'مصر', 31.0409, 31.3785)">🌾 المنصورة</button>
+                <button class="location-btn" onclick="setEgyptLocation('طنطا', 'مصر', 30.7865, 31.0004)">🕌 طنطا</button>
+                <button class="location-btn" onclick="setEgyptLocation('الزقازيق', 'مصر', 30.5877, 31.5021)">🌿 الزقازيق</button>
+                <button class="location-btn" onclick="setEgyptLocation('بورسعيد', 'مصر', 31.2653, 32.3019)">⚓ بورسعيد</button>
+                <button class="location-btn" onclick="setEgyptLocation('السويس', 'مصر', 29.9668, 32.5498)">🚢 السويس</button>
+                <button class="location-btn" onclick="setEgyptLocation('الفيوم', 'مصر', 29.3084, 30.8428)">🏞️ الفيوم</button>
+                <button class="location-btn" onclick="setEgyptLocation('بني سويف', 'مصر', 29.0661, 31.0994)">🏜️ بني سويف</button>
+                <button class="location-btn" onclick="setEgyptLocation('المنيا', 'مصر', 28.0871, 30.7618)">🏺 المنيا</button>
+                <button class="location-btn" onclick="setEgyptLocation('قنا', 'مصر', 26.1551, 32.7160)">🏛️ قنا</button>
+                <button class="location-btn" onclick="setEgyptLocation('سوهاج', 'مصر', 26.5569, 31.6948)">🌾 سوهاج</button>
+                <button class="location-btn" onclick="setEgyptLocation('أسيوط', 'مصر', 27.1809, 31.1837)">🏛️ أسيوط</button>
+                <button class="location-btn" onclick="setEgyptLocation('دمياط', 'مصر', 31.4175, 31.8144)">🎣 دمياط</button>
+                <button class="location-btn" onclick="setEgyptLocation('كفر الشيخ', 'مصر', 31.1107, 30.9388)">🌾 كفر الشيخ</button>
+            </div>
         </div>
         {% else %}
         <div class="location-setup">
@@ -483,115 +507,176 @@
 
     <script>
         function setEgyptLocation(city, country, lat, lng) {
-            // Get the button that was clicked
-            const button = event.target;
-            button.classList.add('loading');
-            button.textContent = 'جاري الحفظ...';
+            console.log('Setting location:', city, country, lat, lng);
             
-            fetch('/set-location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    city: city,
-                    country: country,
-                    latitude: lat,
-                    longitude: lng
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            // Find the clicked button
+            const buttons = document.querySelectorAll('.location-btn');
+            let clickedButton = null;
+            
+            // Find which button was clicked
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(city)) {
+                    clickedButton = btn;
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Show success message before reload
-                    button.textContent = '✅ تم الحفظ';
-                    button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            });
+            
+            if (clickedButton) {
+                const originalText = clickedButton.textContent;
+                clickedButton.classList.add('loading');
+                clickedButton.textContent = 'جاري الحفظ...';
+                clickedButton.disabled = true;
+                
+                fetch('/set-location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        city: city,
+                        country: country,
+                        latitude: parseFloat(lat),
+                        longitude: parseFloat(lng)
+                    })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        clickedButton.textContent = '✅ تم الحفظ بنجاح';
+                        clickedButton.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                        
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        throw new Error(data.error || 'فشل في حفظ الموقع');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error details:', error);
+                    clickedButton.textContent = '❌ خطأ - أعد المحاولة';
+                    clickedButton.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
                     
                     setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    throw new Error(data.error || 'Failed to save location');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('فشل في حفظ الموقع: ' + error.message + '\nFailed to save location');
-                button.textContent = button.getAttribute('data-original-text') || 'إعادة المحاولة';
-                button.classList.remove('loading');
-            });
+                        clickedButton.textContent = originalText;
+                        clickedButton.style.background = '';
+                        clickedButton.disabled = false;
+                        clickedButton.classList.remove('loading');
+                    }, 3000);
+                    
+                    alert('خطأ في حفظ الموقع: ' + error.message);
+                });
+            }
         }
 
-        // Store original button text
-        document.addEventListener('DOMContentLoaded', function() {
-            const locationButtons = document.querySelectorAll('.location-btn');
-            locationButtons.forEach(button => {
-                button.setAttribute('data-original-text', button.textContent);
-            });
-        });
-
         function showEgyptLocations() {
-            const locations = document.getElementById('egyptLocations');
-            if (locations) {
-                locations.style.display = locations.style.display === 'none' ? 'grid' : 'none';
+            const locationsDiv = document.getElementById('egyptLocationsUpdate') || document.getElementById('egyptLocations');
+            if (locationsDiv) {
+                const isHidden = locationsDiv.style.display === 'none' || locationsDiv.style.display === '';
+                locationsDiv.style.display = isHidden ? 'grid' : 'none';
+                
+                // Change button text
+                const button = event.target;
+                if (isHidden) {
+                    button.textContent = '🔽 إخفاء المدن';
+                } else {
+                    button.textContent = '🇪🇬 اختيار مدينة مصرية أخرى';
+                }
             }
         }
 
         function getLocation() {
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'جاري تحديد الموقع...';
+            button.disabled = true;
+            
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        console.log('Got coordinates:', lat, lng);
+                        
+                        // Check if location is approximately in Egypt
+                        if (lat >= 22 && lat <= 32 && lng >= 25 && lng <= 35) {
+                            // Use a simple city name for Egypt
+                            const city = 'موقعي الحالي';
+                            const country = 'مصر';
+                            
+                            fetch('/set-location', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    city: city,
+                                    country: country,
+                                    latitude: lat,
+                                    longitude: lng
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    button.textContent = '✅ تم تحديث الموقع';
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1000);
+                                } else {
+                                    throw new Error('Failed to save location');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                button.textContent = originalText;
+                                button.disabled = false;
+                                alert('فشل في حفظ الموقع\nFailed to save location');
+                            });
+                        } else {
+                            button.textContent = originalText;
+                            button.disabled = false;
+                            alert('يبدو أنك خارج مصر. يرجى اختيار مدينة من القائمة.\nYou seem to be outside Egypt. Please choose a city from the list.');
+                        }
+                    },
+                    function(error) {
+                        button.textContent = originalText;
+                        button.disabled = false;
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                alert("تم رفض طلب الموقع. يرجى اختيار مدينة من القائمة.\nLocation request denied. Please choose a city from the list.");
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                alert("معلومات الموقع غير متاحة\nLocation information is unavailable.");
+                                break;
+                            case error.TIMEOUT:
+                                alert("انتهت مهلة طلب الموقع\nLocation request timed out.");
+                                break;
+                            default:
+                                alert("حدث خطأ في تحديد الموقع\nAn error occurred while getting location.");
+                                break;
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000
+                    }
+                );
             } else {
+                button.textContent = originalText;
+                button.disabled = false;
                 alert("الموقع الجغرافي غير مدعوم في هذا المتصفح\nGeolocation is not supported by this browser.");
             }
-        }
-
-        function showPosition(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            
-            // Check if location is in Egypt (approximate bounds)
-            if (lat >= 22 && lat <= 32 && lng >= 25 && lng <= 35) {
-                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ar`)
-                .then(response => response.json())
-                .then(data => {
-                    const city = data.city || data.locality || 'مدينة مصرية';
-                    const country = 'مصر';
-                    
-                    setEgyptLocation(city, country, lat, lng);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    setEgyptLocation('موقع في مصر', 'مصر', lat, lng);
-                });
-            } else {
-                alert('يبدو أنك خارج مصر. يرجى اختيار مدينة مصرية من القائمة.\nIt seems you are outside Egypt. Please choose an Egyptian city from the list.');
-            }
-        }
-
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("تم رفض طلب الموقع. يرجى اختيار مدينة من القائمة.\nLocation request denied. Please choose a city from the list.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("معلومات الموقع غير متاحة\nLocation information is unavailable.");
-                    break;
-                case error.TIMEOUT:
-                    alert("انتهت مهلة طلب الموقع\nLocation request timed out.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("حدث خطأ غير معروف\nAn unknown error occurred.");
-                    break;
-            }
-        }
-
-        function updateLocation() {
-            showEgyptLocations();
         }
 
         // Highlight current and next prayer

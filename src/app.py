@@ -417,43 +417,62 @@ def set_location():
     if 'user_id' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
-    data = request.json
-    city = data.get('city')
-    country = data.get('country')
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
-    
-    if not all([city, country, latitude, longitude]):
-        return jsonify({'error': 'Missing location data'}), 400
-    
-    # Get timezone for the location
-    timezone = get_timezone(latitude, longitude)
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Check if user location exists
-    cursor.execute('SELECT id FROM user_locations WHERE user_id = ?', (session['user_id'],))
-    existing = cursor.fetchone()
-    
-    if existing:
-        # Update existing location
-        cursor.execute('''
-            UPDATE user_locations 
-            SET city = ?, country = ?, latitude = ?, longitude = ?, timezone = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-        ''', (city, country, latitude, longitude, timezone, session['user_id']))
-    else:
-        # Insert new location
-        cursor.execute('''
-            INSERT INTO user_locations (user_id, city, country, latitude, longitude, timezone, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        ''', (session['user_id'], city, country, latitude, longitude, timezone))
-    
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'success': True})
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data received'}), 400
+            
+        city = data.get('city')
+        country = data.get('country')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        print(f"Received location data: {city}, {country}, {latitude}, {longitude}")
+        
+        if not all([city, country, latitude, longitude]):
+            return jsonify({'error': 'Missing location data'}), 400
+        
+        # Convert to float if they're strings
+        try:
+            latitude = float(latitude)
+            longitude = float(longitude)
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Invalid coordinates'}), 400
+        
+        # Get timezone for the location
+        timezone = get_timezone(latitude, longitude)
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if user location exists
+        cursor.execute('SELECT id FROM user_locations WHERE user_id = ?', (session['user_id'],))
+        existing = cursor.fetchone()
+        
+        if existing:
+            # Update existing location
+            cursor.execute('''
+                UPDATE user_locations 
+                SET city = ?, country = ?, latitude = ?, longitude = ?, timezone = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+            ''', (city, country, latitude, longitude, timezone, session['user_id']))
+            print(f"Updated location for user {session['user_id']}")
+        else:
+            # Insert new location
+            cursor.execute('''
+                INSERT INTO user_locations (user_id, city, country, latitude, longitude, timezone, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ''', (session['user_id'], city, country, latitude, longitude, timezone))
+            print(f"Inserted new location for user {session['user_id']}")
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        print(f"Error in set_location: {str(e)}")
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 @app.route('/get-prayer-times-api')
 def get_prayer_times_api():
