@@ -81,6 +81,7 @@
         <a href="{{ url_for('home') }}">Home</a>
         {% if username %}
             <a href="{{ url_for('my_phrases') }}">My Phrases</a>
+            <a href="{{ url_for('tasbeh') }}">Tasbeh</a>
             <div class="user-info">
                 Welcome, {{ username }}! | 
                 <a href="{{ url_for('logout') }}">Logout</a>

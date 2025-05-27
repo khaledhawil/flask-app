@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التسبيح الإلكتروني - Tasbeh</title>
+    <style>
+        body {
+            font-family: 'Arial', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .navbar {
+            background-color: rgba(0,0,0,0.8);
+            padding: 1rem;
+            margin-bottom: 30px;
+            direction: ltr;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+        .navbar a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .total-counter {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .total-count {
+            font-size: 3em;
+            font-weight: bold;
+            color: #fff;
+            margin: 10px 0;
+        }
+        .phrase-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .phrase-container:hover {
+            transform: translateY(-5px);
+        }
+        .phrase-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+        }
+        .counter-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .count-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #27ae60;
+            min-width: 80px;
+            text-align: center;
+        }
+        .count-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .count-btn.main {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 15px rgba(39,174,96,0.3);
+        }
+        .count-btn.main:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(39,174,96,0.4);
+        }
+        .count-btn.main:active {
+            transform: scale(0.95);
+        }
+        .reset-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(231,76,60,0.3);
+        }
+        .last-updated {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        @media (max-width: 600px) {
+            .phrase-text {
+                font-size: 1.4em;
+            }
+            .count-display {
+                font-size: 2em;
+            }
+            .count-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="direction: ltr;">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('my_phrases') }}">My Phrases</a>
+        <a href="{{ url_for('tasbeh') }}">Tasbeh</a>
+        <a href="{{ url_for('prayer_times') }}">Prayer Times</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>🕌 التسبيح الإلكتروني</h1>
+            <p>Digital Tasbeh for {{ username }}</p>
+        </div>
+
+        <div class="total-counter">
+            <h3>إجمالي التسبيحات</h3>
+            <div class="total-count" id="totalCount">0</div>
+            <p>Total Dhikr Count</p>
+        </div>
+
+        {% for phrase_data in phrases %}
+        <div class="phrase-container">
+            <div class="phrase-text">{{ phrase_data.phrase }}</div>
+            
+            <div class="counter-section">
+                <button class="reset-btn" onclick="resetCount('{{ phrase_data.phrase }}', this)">
+                    Reset
+                </button>
+                
+                <div class="count-display" id="count-{{ loop.index0 }}">
+                    {{ phrase_data.count }}
+                </div>
+                
+                <button class="count-btn main" onclick="incrementCount('{{ phrase_data.phrase }}', {{ loop.index0 }}, this)">
+                    +1
+                </button>
+            </div>
+            
+            {% if phrase_data.last_updated %}
+            <div class="last-updated">
+                آخر تحديث: {{ phrase_data.last_updated }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Load total count on page load
+        window.onload = function() {
+            updateTotalCount();
+        };
+
+        function incrementCount(phrase, index, button) {
+            button.classList.add('loading');
+            
+            fetch('/tasbeh/count', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({phrase: phrase})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('count-' + index).textContent = data.count;
+                    updateTotalCount();
+                    
+                    // Visual feedback
+                    button.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        button.style.transform = '';
+                    }, 200);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                button.classList.remove('loading');
+            });
+        }
+
+        function resetCount(phrase, button) {
+            if (!confirm('هل أنت متأكد من إعادة تعيين العداد؟\nAre you sure you want to reset this counter?')) {
+                return;
+            }
+            
+            button.classList.add('loading');
+            
+            fetch('/tasbeh/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({phrase: phrase})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Find the count display for this phrase
+                    const container = button.closest('.phrase-container');
+                    const countDisplay = container.querySelector('.count-display');
+                    countDisplay.textContent = '0';
+                    updateTotalCount();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                button.classList.remove('loading');
+            });
+        }
+
+        function updateTotalCount() {
+            fetch('/tasbeh/total')
+            .then(response => response.json())
+            .then data => {
+                document.getElementById('totalCount').textContent = data.total;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Add click sound effect (optional)
+        function playClickSound() {
+            // You can add audio feedback here if desired
+        }
+    </script>
+</body>
+</html>

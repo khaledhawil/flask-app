@@ -3,6 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import random
 import os
+import requests
+from datetime import datetime, timedelta
+import json
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
@@ -36,6 +39,34 @@ def init_db():
         )
     ''')
     
+    # Tasbeh table for counting Islamic phrases
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tasbeh_counts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            phrase TEXT NOT NULL,
+            count INTEGER DEFAULT 0,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            UNIQUE(user_id, phrase)
+        )
+    ''')
+    
+    # User location table for prayer times
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_locations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE,
+            city TEXT,
+            country TEXT,
+            latitude REAL,
+            longitude REAL,
+            timezone TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -53,6 +84,18 @@ default_phrases = [
     "Code with passion, debug with patience.",
     "Innovation distinguishes between a leader and a follower.",
     "The only way to learn programming is by writing programs."
+]
+
+# Default Islamic phrases for Tasbeh
+islamic_phrases = [
+    "سبحان الله",  # SubhanAllah
+    "الحمد لله",   # Alhamdulillah
+    "الله أكبر",   # Allahu Akbar
+    "لا إله إلا الله",  # La ilaha illa Allah
+    "اللهم صل على سيدنا محمد",  # Allahumma salli ala sayyidina Muhammad
+    "أستغفر الله",  # Astaghfirullah
+    "لا حول ولا قوة إلا بالله",  # La hawla wa la quwwata illa billah
+    "بسم الله الرحمن الرحيم"  # Bismillah ar-Rahman ar-Raheem
 ]
 
 def get_db_connection():
@@ -187,6 +230,261 @@ def delete_phrase(phrase_id):
     
     flash('Phrase deleted successfully!', 'success')
     return redirect(url_for('my_phrases'))
+
+@app.route('/tasbeh')
+def tasbeh():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get user's tasbeh counts
+    cursor.execute('''
+        SELECT phrase, count, last_updated 
+        FROM tasbeh_counts 
+        WHERE user_id = ? 
+        ORDER BY last_updated DESC
+    ''', (session['user_id'],))
+    
+    user_counts = {}
+    for row in cursor.fetchall():
+        user_counts[row[0]] = {'count': row[1], 'last_updated': row[2]}
+    
+    conn.close()
+    
+    # Prepare phrases with counts
+    phrases_data = []
+    for phrase in islamic_phrases:
+        count_data = user_counts.get(phrase, {'count': 0, 'last_updated': None})
+        phrases_data.append({
+            'phrase': phrase,
+            'count': count_data['count'],
+            'last_updated': count_data['last_updated']
+        })
+    
+    return render_template('tasbeh.html', phrases=phrases_data, username=session.get('username'))
+
+@app.route('/tasbeh/count', methods=['POST'])
+def count_tasbeh():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    phrase = request.json.get('phrase')
+    if phrase not in islamic_phrases:
+        return jsonify({'error': 'Invalid phrase'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Insert or update count
+    cursor.execute('''
+        INSERT INTO tasbeh_counts (user_id, phrase, count, last_updated)
+        VALUES (?, ?, 1, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, phrase) 
+        DO UPDATE SET 
+            count = count + 1,
+            last_updated = CURRENT_TIMESTAMP
+    ''', (session['user_id'], phrase))
+    
+    # Get updated count
+    cursor.execute('SELECT count FROM tasbeh_counts WHERE user_id = ? AND phrase = ?', 
+                   (session['user_id'], phrase))
+    new_count = cursor.fetchone()[0]
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'count': new_count})
+
+@app.route('/tasbeh/reset', methods=['POST'])
+def reset_tasbeh():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    phrase = request.json.get('phrase')
+    if phrase not in islamic_phrases:
+        return jsonify({'error': 'Invalid phrase'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('DELETE FROM tasbeh_counts WHERE user_id = ? AND phrase = ?', 
+                   (session['user_id'], phrase))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'count': 0})
+
+@app.route('/tasbeh/total')
+def tasbeh_total():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT SUM(count) FROM tasbeh_counts WHERE user_id = ?', 
+                   (session['user_id'],))
+    total = cursor.fetchone()[0] or 0
+    
+    conn.close()
+    
+    return jsonify({'total': total})
+
+@app.route('/prayer-times')
+def prayer_times():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get user location
+    cursor.execute('SELECT city, country, latitude, longitude, timezone FROM user_locations WHERE user_id = ?', 
+                   (session['user_id'],))
+    location = cursor.fetchone()
+    
+    conn.close()
+    
+    prayer_data = None
+    location_info = None
+    
+    if location:
+        city, country, lat, lng, timezone = location
+        location_info = {
+            'city': city,
+            'country': country,
+            'latitude': lat,
+            'longitude': lng,
+            'timezone': timezone
+        }
+        
+        # Get prayer times from API
+        prayer_data = get_prayer_times(lat, lng)
+    
+    return render_template('prayer_times.html', 
+                         prayer_data=prayer_data, 
+                         location=location_info,
+                         username=session.get('username'))
+
+@app.route('/set-location', methods=['POST'])
+def set_location():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.json
+    city = data.get('city')
+    country = data.get('country')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    
+    if not all([city, country, latitude, longitude]):
+        return jsonify({'error': 'Missing location data'}), 400
+    
+    # Get timezone for the location
+    timezone = get_timezone(latitude, longitude)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO user_locations (user_id, city, country, latitude, longitude, timezone, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id) 
+        DO UPDATE SET 
+            city = excluded.city,
+            country = excluded.country,
+            latitude = excluded.latitude,
+            longitude = excluded.longitude,
+            timezone = excluded.timezone,
+            updated_at = CURRENT_TIMESTAMP
+    ''', (session['user_id'], city, country, latitude, longitude, timezone))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+@app.route('/get-prayer-times-api')
+def get_prayer_times_api():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT latitude, longitude FROM user_locations WHERE user_id = ?', 
+                   (session['user_id'],))
+    location = cursor.fetchone()
+    conn.close()
+    
+    if not location:
+        return jsonify({'error': 'Location not set'}), 400
+    
+    lat, lng = location
+    prayer_data = get_prayer_times(lat, lng)
+    
+    if prayer_data:
+        return jsonify(prayer_data)
+    else:
+        return jsonify({'error': 'Failed to get prayer times'}), 500
+
+def get_prayer_times(latitude, longitude):
+    """Get prayer times from Aladhan API"""
+    try:
+        today = datetime.now().strftime('%d-%m-%Y')
+        url = f"http://api.aladhan.com/v1/timings/{today}"
+        params = {
+            'latitude': latitude,
+            'longitude': longitude,
+            'method': 2,  # ISNA method
+            'tune': '0,0,0,0,0,0,0,0,0'  # No adjustments
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data['code'] == 200:
+                timings = data['data']['timings']
+                date_info = data['data']['date']
+                
+                # Format prayer times
+                prayer_times = {
+                    'Fajr': format_time(timings['Fajr']),
+                    'Sunrise': format_time(timings['Sunrise']),
+                    'Dhuhr': format_time(timings['Dhuhr']),
+                    'Asr': format_time(timings['Asr']),
+                    'Maghrib': format_time(timings['Maghrib']),
+                    'Isha': format_time(timings['Isha']),
+                    'date': date_info['readable'],
+                    'hijri_date': date_info['hijri']['date']
+                }
+                
+                return prayer_times
+    except Exception as e:
+        print(f"Error getting prayer times: {e}")
+        return None
+
+def get_timezone(latitude, longitude):
+    """Get timezone for location using TimezoneDB API or fallback"""
+    try:
+        # You can use a free timezone API or calculate based on longitude
+        # For simplicity, we'll calculate approximate timezone
+        timezone_offset = int(longitude / 15)
+        return f"UTC{timezone_offset:+d}"
+    except:
+        return "UTC+0"
+
+def format_time(time_str):
+    """Format time from 24h to 12h format"""
+    try:
+        time_obj = datetime.strptime(time_str, '%H:%M')
+        return time_obj.strftime('%I:%M %p')
+    except:
+        return time_str
 
 @app.route('/health')
 def health():
