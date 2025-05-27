@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم - Holy Quran</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Scheherazade+New:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Cairo', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            margin: 0;
+            min-height: 100vh;
+            direction: rtl;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(34, 197, 94, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            z-index: -2;
+        }
+        
+        .islamic-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,215,0,0.05) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(255,215,0,0.05) 2px, transparent 2px);
+            background-size: 60px 60px;
+            z-index: -1;
+        }
+        
+        .navbar {
+            background: linear-gradient(90deg, rgba(0,0,0,0.95), rgba(0,0,0,0.8));
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            margin-bottom: 30px;
+            direction: ltr;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            border-bottom: 2px solid rgba(255,215,0,0.2);
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+        }
+        
+        .navbar a:hover {
+            background: rgba(255,215,0,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,215,0,0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .header h1 {
+            font-family: 'Amiri', serif;
+            font-size: 4em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 12px rgba(0,0,0,0.7);
+            background: linear-gradient(45deg, #ffd700, #ffed4a, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .bismillah {
+            font-family: 'Scheherazade New', serif;
+            font-size: 2.5em;
+            text-align: center;
+            color: #ffd700;
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.05));
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,215,0,0.3);
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        
+        .quran-controls {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .audio-player {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .play-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(34, 197, 94, 0.6);
+        }
+        
+        .reciter-select {
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            font-size: 16px;
+            font-weight: 600;
+            min-width: 200px;
+        }
+        
+        .verse-container {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            border-radius: 25px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,215,0,0.2);
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .verse-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+            transition: left 0.8s ease;
+        }
+        
+        .verse-container:hover::before {
+            left: 100%;
+        }
+        
+        .verse-arabic {
+            font-family: 'Scheherazade New', serif;
+            font-size: 2.5em;
+            line-height: 1.8;
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .verse-translation {
+            font-size: 1.3em;
+            color: #374151;
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 12px;
+        }
+        
+        .verse-reference {
+            text-align: center;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 1.1em;
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
+        }
+        
+        .hadith-section {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1));
+            border-radius: 25px;
+            padding: 35px;
+            margin: 30px 0;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+        
+        .hadith-container {
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .hadith-arabic {
+            font-family: 'Amiri', serif;
+            font-size: 1.8em;
+            line-height: 1.7;
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .hadith-translation {
+            font-size: 1.2em;
+            color: #374151;
+            font-style: italic;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .hadith-narrator {
+            text-align: center;
+            color: #7c3aed;
+            font-weight: 600;
+            font-size: 1em;
+        }
+        
+        .daily-dhikr {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+            border-radius: 25px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            text-align: center;
+            color: white;
+        }
+        
+        .dhikr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .dhikr-card {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            color: #1f2937;
+            transition: transform 0.3s ease;
+        }
+        
+        .dhikr-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .dhikr-arabic {
+            font-family: 'Amiri', serif;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .dhikr-count {
+            font-weight: bold;
+            color: #22c55e;
+            font-size: 1.2em;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .verse-arabic {
+                font-size: 2em;
+            }
+            .header h1 {
+                font-size: 3em;
+            }
+            .bismillah {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="islamic-pattern"></div>
+    
+    <nav class="navbar" style="direction: ltr;">
+        <a href="{{ url_for('home') }}">🏠 Home</a>
+        <a href="{{ url_for('my_phrases') }}">💭 My Phrases</a>
+        <a href="{{ url_for('tasbeh') }}">📿 Tasbeh</a>
+        <a href="{{ url_for('prayer_times') }}">🕌 Prayer Times</a>
+        <a href="{{ url_for('quran') }}">📖 Quran</a>
+        <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>📖 القرآن الكريم</h1>
+            <p>Holy Quran for {{ username }}</p>
+        </div>
+
+        <div class="bismillah">
+            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+        </div>
+
+        <div class="quran-controls">
+            <h3 style="color: white; margin-bottom: 20px;">🎵 استمع للقرآن الكريم</h3>
+            
+            <div class="audio-player">
+                <button class="play-btn" onclick="toggleQuranAudio()" id="playBtn">
+                    ▶️
+                </button>
+                
+                <select class="reciter-select" id="reciterSelect">
+                    <option value="mishary">مشاري العفاسي</option>
+                    <option value="sudais">عبد الرحمن السديس</option>
+                    <option value="maher">ماهر المعيقلي</option>
+                    <option value="ajmi">أحمد العجمي</option>
+                </select>
+            </div>
+            
+            <audio id="quranAudio" preload="none">
+                <source src="https://server8.mp3quran.net/ahmad_nu3man/001.mp3" type="audio/mpeg">
+                المتصفح لا يدعم تشغيل الصوت
+            </audio>
+            
+            <p style="color: white; margin-top: 15px;">اختر القارئ واضغط تشغيل للاستماع لسورة الفاتحة</p>
+        </div>
+
+        {% for verse in verses %}
+        <div class="verse-container" style="animation-delay: {{ loop.index0 * 0.2 }}s">
+            <div class="verse-arabic">{{ verse.arabic }}</div>
+            <div class="verse-translation">{{ verse.translation }}</div>
+            <div class="verse-reference">{{ verse.reference }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="hadith-section">
+            <h3 style="color: white; text-align: center; margin-bottom: 25px;">📚 أحاديث شريفة</h3>
+            
+            {% for hadith in hadiths %}
+            <div class="hadith-container">
+                <div class="hadith-arabic">{{ hadith.arabic }}</div>
+                <div class="hadith-translation">{{ hadith.translation }}</div>
+                <div class="hadith-narrator">{{ hadith.narrator }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="daily-dhikr">
+            <h3>🌅 أذكار الصباح والمساء</h3>
+            <p>Daily Morning and Evening Dhikr</p>
+            
+            <div class="dhikr-grid">
+                <div class="dhikr-card">
+                    <div class="dhikr-arabic">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</div>
+                    <div class="dhikr-count">3 مرات</div>
+                </div>
+                
+                <div class="dhikr-card">
+                    <div class="dhikr-arabic">قُلْ هُوَ اللَّهُ أَحَدٌ</div>
+                    <div class="dhikr-count">3 مرات</div>
+                </div>
+                
+                <div class="dhikr-card">
+                    <div class="dhikr-arabic">قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ</div>
+                    <div class="dhikr-count">3 مرات</div>
+                </div>
+                
+                <div class="dhikr-card">
+                    <div class="dhikr-arabic">قُلْ أَعُوذُ بِرَبِّ النَّاسِ</div>
+                    <div class="dhikr-count">3 مرات</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isPlaying = false;
+        const audio = document.getElementById('quranAudio');
+        const playBtn = document.getElementById('playBtn');
+        const reciterSelect = document.getElementById('reciterSelect');
+
+        const reciters = {
+            'mishary': 'https://server8.mp3quran.net/ahmad_nu3man/001.mp3',
+            'sudais': 'https://server11.mp3quran.net/sds/001.mp3',
+            'maher': 'https://server12.mp3quran.net/maher/001.mp3',
+            'ajmi': 'https://server10.mp3quran.net/ajm/001.mp3'
+        };
+
+        function toggleQuranAudio() {
+            if (isPlaying) {
+                audio.pause();
+                playBtn.innerHTML = '▶️';
+                isPlaying = false;
+            } else {
+                audio.play().then(() => {
+                    playBtn.innerHTML = '⏸️';
+                    isPlaying = true;
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    alert('خطأ في تشغيل الصوت. يرجى المحاولة مرة أخرى.');
+                });
+            }
+        }
+
+        reciterSelect.addEventListener('change', function() {
+            const selectedReciter = this.value;
+            audio.src = reciters[selectedReciter];
+            if (isPlaying) {
+                audio.play();
+            }
+        });
+
+        audio.addEventListener('ended', function() {
+            playBtn.innerHTML = '▶️';
+            isPlaying = false;
+        });
+
+        audio.addEventListener('error', function() {
+            console.error('Audio loading error');
+            playBtn.innerHTML = '▶️';
+            isPlaying = false;
+        });
+
+        // Initialize
+        window.onload = function() {
+            // Set initial reciter
+            audio.src = reciters['mishary'];
+        };
+    </script>
+</body>
+</html>

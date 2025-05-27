@@ -483,8 +483,10 @@
 
     <script>
         function setEgyptLocation(city, country, lat, lng) {
+            // Get the button that was clicked
             const button = event.target;
             button.classList.add('loading');
+            button.textContent = 'جاري الحفظ...';
             
             fetch('/set-location', {
                 method: 'POST',
@@ -498,22 +500,40 @@
                     longitude: lng
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    location.reload();
+                    // Show success message before reload
+                    button.textContent = '✅ تم الحفظ';
+                    button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
-                    alert('فشل في حفظ الموقع\nFailed to save location');
+                    throw new Error(data.error || 'Failed to save location');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ في حفظ الموقع\nError saving location');
-            })
-            .finally(() => {
+                alert('فشل في حفظ الموقع: ' + error.message + '\nFailed to save location');
+                button.textContent = button.getAttribute('data-original-text') || 'إعادة المحاولة';
                 button.classList.remove('loading');
             });
         }
+
+        // Store original button text
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationButtons = document.querySelectorAll('.location-btn');
+            locationButtons.forEach(button => {
+                button.setAttribute('data-original-text', button.textContent);
+            });
+        });
 
         function showEgyptLocations() {
             const locations = document.getElementById('egyptLocations');

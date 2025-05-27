@@ -540,7 +540,7 @@
         function updateTotalCount() {
             fetch('/tasbeh/total')
             .then(response => response.json())
-            .then data => {
+            .then(data => {
                 const totalElement = document.getElementById('totalCount');
                 totalElement.textContent = data.total;
                 

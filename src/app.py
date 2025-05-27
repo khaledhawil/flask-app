@@ -98,6 +98,43 @@ islamic_phrases = [
     "بسم الله الرحمن الرحيم"  # Bismillah ar-Rahman ar-Raheem
 ]
 
+# Quran verses and Islamic content
+quran_verses = [
+    {
+        "arabic": "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+        "translation": "And whoever fears Allah - He will make for him a way out",
+        "reference": "سورة الطلاق آية 2"
+    },
+    {
+        "arabic": "وَاللَّهُ غَالِبٌ عَلَىٰ أَمْرِهِ وَلَٰكِنَّ أَكْثَرَ النَّاسِ لَا يَعْلَمُونَ",
+        "translation": "And Allah is predominant over His affair, but most people do not know",
+        "reference": "سورة يوسف آية 21"
+    },
+    {
+        "arabic": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
+        "translation": "For indeed, with hardship comes ease",
+        "reference": "سورة الشرح آية 5"
+    },
+    {
+        "arabic": "وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ",
+        "translation": "And He is with you wherever you are",
+        "reference": "سورة الحديد آية 4"
+    }
+]
+
+hadith_collection = [
+    {
+        "arabic": "من قال سبحان الله وبحمده في يوم مائة مرة حطت خطاياه وإن كانت مثل زبد البحر",
+        "translation": "Whoever says 'SubhanAllahi wa bihamdihi' 100 times a day, his sins will be wiped away even if they were like the foam of the sea",
+        "narrator": "رواه البخاري ومسلم"
+    },
+    {
+        "arabic": "أحب الكلام إلى الله أربع: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر",
+        "translation": "The most beloved words to Allah are four: SubhanAllah, Alhamdulillah, La ilaha illa Allah, and Allahu Akbar",
+        "narrator": "رواه مسلم"
+    }
+]
+
 def get_db_connection():
     db_path = '/app/data/app.db' if os.path.exists('/app/data') else 'app.db'
     return sqlite3.connect(db_path)
@@ -500,6 +537,26 @@ def format_time(time_str):
 @app.route('/health')
 def health():
     return {'status': 'healthy', 'message': 'Flask app is running'}, 200
+
+@app.route('/quran')
+def quran():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('quran.html', 
+                         verses=quran_verses, 
+                         hadiths=hadith_collection,
+                         username=session.get('username'))
+
+@app.route('/islamic-content')
+def islamic_content():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('islamic_content.html', 
+                         verses=quran_verses, 
+                         hadiths=hadith_collection,
+                         username=session.get('username'))
 
 if __name__ == '__main__':
     init_db()
