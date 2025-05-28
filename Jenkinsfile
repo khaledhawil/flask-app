@@ -7,7 +7,7 @@ pipeline {
         stage("build") {
             steps {
                 script {
-                    def gv = load "script.groovy"
+                    def gv = load "pipeline.groovy"
                     gv.buildImage()
                 }
             }
@@ -15,7 +15,7 @@ pipeline {
         stage("deploy") {
             steps {
                 script {
-                    def gv = load "script.groovy"
+                    def gv = load "pipeline.groovy"
                     gv.deployApp()
                 }
             }
@@ -27,11 +27,16 @@ pipeline {
             script {
                 // Only cleanup if deployment was successful
                 if (currentBuild.currentResult != 'FAILURE') {
-                    def gv = load "script.groovy"
+                    def gv = load "pipeline.groovy"
                     gv.cleanup()
                 }
             }
         }
         failure {
             script {
-                echo "Pipeline failed. Checking
+                echo "Pipeline failed. Checking deployment status..."
+                // Add any failure handling logic here
+            }
+        }
+    }
+}

@@ -40,3 +40,17 @@ def deployApp() {
 def cleanup() {
     echo 'cleaning up old images...'
     sh '''
+        # Remove old unused images to free up space
+        docker image prune -f
+        
+        # Remove dangling images
+        docker images -f "dangling=true" -q | xargs -r docker rmi
+        
+        # Keep only the latest 3 builds of our app
+        docker images khaledhawil/flask-app --format "table {{.Repository}}:{{.Tag}}" | tail -n +2 | sort -V | head -n -3 | xargs -r docker rmi || true
+        
+        echo "Cleanup completed!"
+    '''
+}
+
+return this
