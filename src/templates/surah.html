@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <!-- ...existing code... -->
+    <style>
+        /* ...existing code... */
+        
+        .verse-audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .verse-container:hover .verse-audio-controls {
+            opacity: 1;
+        }
+
+        .verse-play-btn {
+            background: linear-gradient(45deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .verse-play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
+        }
+
+        .reading-controls {
+            position: sticky;
+            top: 20px;
+            background: rgba(248, 246, 240, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid var(--islamic-gold);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .speed-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--islamic-gold);
+            cursor: pointer;
+        }
+
+        .auto-scroll {
+            background: rgba(34, 197, 94, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- ...existing code... -->
+
+    <div class="container">
+        <!-- أدوات التحكم المحسنة -->
+        <div class="reading-controls">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <button class="control-btn play-btn" onclick="playFullSurah()">
+                    ▶️ تشغيل السورة كاملة
+                </button>
+                <button class="control-btn" onclick="playVerseByVerse()">
+                    🔄 تشغيل آية بآية
+                </button>
+                <button class="control-btn" onclick="changeTextSize(1)">🔍 تكبير النص</button>
+                <button class="control-btn" onclick="changeTextSize(-1)">🔍 تصغير النص</button>
+                <button class="control-btn" onclick="toggleNightMode()">🌙 الوضع الليلي</button>
+            </div>
+
+            <!-- التحكم في سرعة القراءة -->
+            <div class="speed-control">
+                <span style="color: var(--islamic-green); font-weight: bold;">سرعة القراءة:</span>
+                <input type="range" min="0.5" max="2" step="0.1" value="1" class="speed-slider" id="playbackSpeed" oninput="changePlaybackSpeed(this.value)">
+                <span id="speedValue" style="color: var(--islamic-brown);">1x</span>
+            </div>
+
+            <!-- التمرير التلقائي -->
+            <div class="auto-scroll">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="autoScroll" onchange="toggleAutoScroll()">
+                    <span style="color: var(--islamic-green); font-weight: bold;">التمرير التلقائي مع الآيات</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- البسملة -->
+        {% if surah.number != 9 %}
+        <div class="verse-container">
+            <div class="verse-arabic" style="font-size: 2.5em;">
+                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+            </div>
+            <div class="verse-audio-controls">
+                <button class="verse-play-btn" onclick="playBasmala()">
+                    ▶️ استمع للبسملة
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- الآيات -->
+        {% for verse in surah.verses %}
+        <div class="verse-container" id="verse-container-{{ verse.number }}">
+            <div class="verse-number">{{ verse.number }}</div>
+            <div class="verse-arabic" id="verse-{{ verse.number }}">
+                {{ verse.arabic }}
+            </div>
+            <div class="verse-translation">
+                {{ verse.translation }}
+            </div>
+            <div class="verse-audio-controls">
+                <button class="verse-play-btn" onclick="playVerse({{ verse.number }})">
+                    ▶️ استمع للآية
+                </button>
+                <button class="verse-play-btn" onclick="repeatVerse({{ verse.number }})">
+                    🔄 كرر 3 مرات
+                </button>
+                <button class="verse-play-btn" onclick="bookmarkVerse({{ verse.number }})">
+                    🔖 حفظ الآية
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- تشغيل تقسيمي -->
+        <div style="background: rgba(168, 85, 247, 0.1); padding: 25px; border-radius: 20px; margin: 30px 0; border: 2px solid rgba(168, 85, 247, 0.3);">
+            <h3 style="text-align: center; color: var(--islamic-green); margin-bottom: 20px;">📖 خيارات القراءة المتقدمة</h3>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <button class="control-btn" onclick="playRange()">📏 تشغيل نطاق آيات</button>
+                <button class="control-btn" onclick="createBookmarks()">🔖 إنشاء علامات مرجعية</button>
+                <button class="control-btn" onclick="exportNotes()">📝 تصدير الملاحظات</button>
+                <button class="control-btn" onclick="shareVerse()">🔗 مشاركة آية</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fontSize = 2.2;
+        let currentVerse = 0;
+        let verseByVerseMode = false;
+        let autoScrollEnabled = false;
+        let playbackSpeed = 1;
+        let isNightMode = false;
+
+        // ...existing code...
+
+        async function playVerseByVerse() {
+            verseByVerseMode = !verseByVerseMode;
+            
+            if (verseByVerseMode) {
+                showNotification('🔄 تم تفعيل تشغيل الآيات واحدة تلو الأخرى');
+                currentVerse = 1;
+                await playVerse(currentVerse);
+            } else {
+                showNotification('⏹️ تم إيقاف التشغيل المتتالي');
+            }
+        }
+
+        async function playVerse(verseNumber) {
+            try {
+                // Highlight current verse
+                highlightVerse(verseNumber);
+                
+                // Get verse audio URL (you'll need to implement verse-level audio)
+                const response = await fetch(`/api/quran/verse-audio/{{ surah.number }}/${verseNumber}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Play verse audio
+                    const audio = new Audio(data.audio_url);
+                    audio.playbackRate = playbackSpeed;
+                    await audio.play();
+                    
+                    // Auto scroll if enabled
+                    if (autoScrollEnabled) {
+                        scrollToVerse(verseNumber);
+                    }
+                    
+                    // Continue to next verse if in verse-by-verse mode
+                    audio.onended = () => {
+                        if (verseByVerseMode && verseNumber < {{ surah.verses|length }}) {
+                            setTimeout(() => playVerse(verseNumber + 1), 1000);
+                        }
+                    };
+                } else {
+                    // Fallback to full surah audio at specific time
+                    playFullSurah();
+                }
+            } catch (error) {
+                console.error('Error playing verse:', error);
+                showNotification('❌ خطأ في تشغيل الآية');
+            }
+        }
+
+        function highlightVerse(verseNumber) {
+            // Remove previous highlights
+            document.querySelectorAll('.verse-container').forEach(el => {
+                el.style.background = '';
+                el.style.transform = '';
+            });
+            
+            // Highlight current verse
+            const verseContainer = document.getElementById(`verse-container-${verseNumber}`);
+            if (verseContainer) {
+                verseContainer.style.background = 'linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1))';
+                verseContainer.style.transform = 'scale(1.02)';
+                verseContainer.style.transition = 'all 0.3s ease';
+            }
+        }
+
+        function scrollToVerse(verseNumber) {
+            const verseElement = document.getElementById(`verse-container-${verseNumber}`);
+            if (verseElement) {
+                verseElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }
+        }
+
+        async function repeatVerse(verseNumber) {
+            for (let i = 0; i < 3; i++) {
+                await new Promise(resolve => {
+                    setTimeout(async () => {
+                        await playVerse(verseNumber);
+                        // Wait for verse to finish
+                        setTimeout(resolve, 3000); // Adjust based on average verse length
+                    }, i * 4000);
+                });
+            }
+        }
+
+        function bookmarkVerse(verseNumber) {
+            // Save bookmark to localStorage
+            const bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
+            const bookmark = {
+                surah: {{ surah.number }},
+                surahName: '{{ surah.name }}',
+                verse: verseNumber,
+                text: document.getElementById(`verse-${verseNumber}`).textContent,
+                timestamp: new Date().toISOString()
+            };
+            
+            bookmarks.push(bookmark);
+            localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+            
+            showNotification(`🔖 تم حفظ الآية ${verseNumber} من سورة {{ surah.name }}`);
+        }
+
+        function changePlaybackSpeed(speed) {
+            playbackSpeed = parseFloat(speed);
+            document.getElementById('speedValue').textContent = `${speed}x`;
+            
+            // Apply to any currently playing audio
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach(audio => {
+                audio.playbackRate = playbackSpeed;
+            });
+        }
+
+        function toggleAutoScroll() {
+            autoScrollEnabled = document.getElementById('autoScroll').checked;
+            
+            if (autoScrollEnabled) {
+                showNotification('✅ تم تفعيل التمرير التلقائي');
+            } else {
+                showNotification('❌ تم إيقاف التمرير التلقائي');
+            }
+        }
+
+        function toggleNightMode() {
+            isNightMode = !isNightMode;
+            
+            if (isNightMode) {
+                document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #2d2d2d)';
+                document.body.style.color = '#f0f0f0';
+                document.querySelectorAll('.verse-container').forEach(el => {
+                    el.style.background = 'linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(30, 30, 30, 0.9))';
+                    el.style.color = '#f0f0f0';
+                });
+                showNotification('🌙 تم تفعيل الوضع الليلي');
+            } else {
+                document.body.style.background = '';
+                document.body.style.color = '';
+                document.querySelectorAll('.verse-container').forEach(el => {
+                    el.style.background = '';
+                    el.style.color = '';
+                });
+                showNotification('☀️ تم تفعيل الوضع النهاري');
+            }
+        }
+
+        function playRange() {
+            const startVerse = prompt('أدخل رقم الآية الأولى:', '1');
+            const endVerse = prompt('أدخل رقم الآية الأخيرة:', '{{ surah.verses|length }}');
+            
+            if (startVerse && endVerse) {
+                const start = parseInt(startVerse);
+                const end = parseInt(endVerse);
+                
+                if (start >= 1 && end <= {{ surah.verses|length }} && start <= end) {
+                    playVerseRange(start, end);
+                } else {
+                    showNotification('❌ نطاق آيات غير صحيح');
+                }
+            }
+        }
+
+        async function playVerseRange(start, end) {
+            verseByVerseMode = true;
+            showNotification(`🎵 تشغيل الآيات من ${start} إلى ${end}`);
+            
+            for (let i = start; i <= end; i++) {
+                await playVerse(i);
+                // Wait between verses
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            verseByVerseMode = false;
+            showNotification('✅ انتهى تشغيل النطاق المحدد');
+        }
+
+        function createBookmarks() {
+            const bookmarks = JSON.parse(localStorage.getItem('quranBookmarks') || '[]');
+            const surahBookmarks = bookmarks.filter(b => b.surah === {{ surah.number }});
+            
+            if (surahBookmarks.length === 0) {
+                showNotification('📖 لا توجد علامات مرجعية في هذه السورة');
+                return;
+            }
+            
+            // Display bookmarks modal
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 20px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                        <h3 style="color: var(--islamic-green); margin-bottom: 20px; text-align: center;">🔖 العلامات المرجعية</h3>
+                        ${surahBookmarks.map(bookmark => `
+                            <div style="padding: 15px; border-bottom: 1px solid #eee; margin-bottom: 10px;">
+                                <div style="font-weight: bold; color: var(--islamic-green);">آية ${bookmark.verse}</div>
+                                <div style="margin: 10px 0; font-size: 1.2em;">${bookmark.text}</div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button onclick="playVerse(${bookmark.verse})" style="background: var(--islamic-green); color: white; border: none; padding: 5px 10px; border-radius: 5px;">▶️ تشغيل</button>
+                                    <button onclick="scrollToVerse(${bookmark.verse})" style="background: var(--islamic-gold); color: var(--islamic-dark-green); border: none; padding: 5px 10px; border-radius: 5px;">📍 انتقال</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button onclick="this.closest('div').closest('div').remove()" style="background: #666; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer;">إغلاق</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.innerHTML = `
+                <div style="position: fixed; top: 20px; right: 20px; background: var(--islamic-green); color: white; padding: 15px 25px; border-radius: 10px; z-index: 3000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); font-family: 'Amiri', serif;">
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ...existing code...
+    </script>
+</body>
+</html>
