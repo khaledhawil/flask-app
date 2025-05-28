@@ -1,38 +1,37 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
-
+    
     stages {
-        stage('Build') {
+        stage("build") {
             steps {
                 script {
-                    docker.build('flask-app')
+                    def gv = load "script.groovy"
+                    gv.buildImage()
                 }
             }
         }
-
-        stage('Test') {
+        stage("deploy") {
             steps {
                 script {
-                    docker.image('flask-app').inside {
-                        sh 'pytest tests/test_app.py'
-                    }
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    // Add deployment steps here, e.g., pushing to a server or cloud service
+                    def gv = load "script.groovy"
+                    gv.deployApp()
                 }
             }
         }
     }
-
+    
     post {
         always {
-            archiveArtifacts artifacts: '**/test-results/*.xml', allowEmptyArchive: true
-            junit '**/test-results/*.xml'
+            script {
+                // Only cleanup if deployment was successful
+                if (currentBuild.currentResult != 'FAILURE') {
+                    def gv = load "script.groovy"
+                    gv.cleanup()
+                }
+            }
         }
-    }
-}
+        failure {
+            script {
+                echo "Pipeline failed. Checking
