@@ -117,6 +117,8 @@
         position: relative;
         overflow: hidden;
         cursor: pointer;
+        text-decoration: none;
+        display: block;
     }
 
     .feature-card::before {
@@ -1348,7 +1350,7 @@
 
 <!-- Features Grid -->
 <div class="features-grid">
-    <div class="feature-card" onclick="window.location.href='{{ url_for('tasbeh') }}'">
+    <div class="feature-card">
         <div class="feature-icon">📿</div>
         <h3 class="feature-title">التسبيح الرقمي</h3>
         <p class="feature-description">
@@ -1359,7 +1361,7 @@
         </a>
     </div>
 
-    <div class="feature-card" onclick="window.location.href='{{ url_for('prayer_times') }}'">
+    <div class="feature-card">
         <div class="feature-icon">🕌</div>
         <h3 class="feature-title">مواقيت الصلاة</h3>
         <p class="feature-description">
@@ -1370,7 +1372,7 @@
         </a>
     </div>
 
-    <div class="feature-card" onclick="window.location.href='{{ url_for('quran') }}'">
+    <div class="feature-card">
         <div class="feature-icon">📖</div>
         <h3 class="feature-title">القرآن الكريم</h3>
         <p class="feature-description">
@@ -1381,7 +1383,18 @@
         </a>
     </div>
 
-    <div class="feature-card" onclick="window.location.href='{{ url_for('my_phrases') }}'">
+    <div class="feature-card">
+        <div class="feature-icon">🕋</div>
+        <h3 class="feature-title">الأحاديث الشريفة</h3>
+        <p class="feature-description">
+            اطلع على مجموعة شاملة من الأحاديث النبوية الصحيحة من مختلف المصادر
+        </p>
+        <a href="{{ url_for('hadith') }}" class="feature-link">
+            <i class="fas fa-arrow-left"></i> تصفح الأحاديث
+        </a>
+    </div>
+
+    <div class="feature-card">
         <div class="feature-icon">💭</div>
         <h3 class="feature-title">عباراتي المخصصة</h3>
         <p class="feature-description">

@@ -1,26 +1,28 @@
-FROM python:3.9-slim
-
-# Set the working directory
-WORKDIR /app
-
-# Create data directory for SQLite database
-RUN mkdir -p /app/data
-
-# Copy the requirements file
-COPY requirements.txt .
-
-# Install the dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the application files
-COPY src/ ./src/
-
-# Expose the port the app runs on
-EXPOSE 5000
+FROM python:3.11-slim
 
 # Set environment variables
-ENV FLASK_APP=src/app.py
-ENV SECRET_KEY=your-production-secret-key
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Set the command to run the application
-CMD ["python", "src/app.py"]
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy project
+COPY . .
+
+# Expose port
+EXPOSE 5000
+
+# Run the app with Gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "src.app:app"]

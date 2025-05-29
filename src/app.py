@@ -1039,6 +1039,53 @@ def get_prayer_times_by_date():
         print(f"Error getting prayer times for date: {e}")
         return jsonify({'error': 'Failed to get prayer times'}), 500
 
+@app.route('/hadith')
+def hadith():
+    """Hadith page with API integration"""
+    username = session.get('username')
+    return render_template('hadith.html', username=username)
+
+@app.route('/api/hadith/editions')
+def get_hadith_editions():
+    """Get all available hadith editions"""
+    try:
+        response = requests.get(
+            'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions.json',
+            timeout=10
+        )
+        if response.status_code == 200:
+            return jsonify({'success': True, 'editions': response.json()})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to fetch editions'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/hadith/<book>/<int:number>')
+def get_hadith_by_number(book, number):
+    """Get specific hadith by book and number"""
+    try:
+        url = f'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/{book}/{number}.json'
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            return jsonify({'success': True, 'hadith': response.json()})
+        else:
+            return jsonify({'success': False, 'error': 'Hadith not found'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/hadith/<book>/<int:start>-<int:end>')
+def get_hadith_range(book, start, end):
+    """Get range of hadiths"""
+    try:
+        url = f'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/{book}/{start}-{end}.json'
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            return jsonify({'success': True, 'hadiths': response.json()})
+        else:
+            return jsonify({'success': False, 'error': 'Hadiths not found'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/favicon.ico')
 def favicon():
     """Serve favicon to prevent 404 errors"""

@@ -12,3 +12,26 @@ nohup: ignoring input
 127.0.0.1 - - [29/May/2025 17:10:43] "GET /?id=5a333178-7620-4174-be59-d663fd25ce78&vscodeBrowserReqId=1748527843164 HTTP/1.1" 200 -
 127.0.0.1 - - [29/May/2025 17:10:43] "[36mGET /static/css/theme.css HTTP/1.1[0m" 304 -
 127.0.0.1 - - [29/May/2025 17:10:43] "[36mGET /static/js/theme.js HTTP/1.1[0m" 304 -
+ * Detected change in '/home/spider/Desktop/EndToEnd-Project/java-docker-jenkins/flask-app/src/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 490-934-177
+ * Detected change in '/home/spider/Desktop/EndToEnd-Project/java-docker-jenkins/flask-app/src/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 490-934-177
+127.0.0.1 - - [29/May/2025 17:27:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:27:58] "[36mGET /static/css/theme.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 17:27:58] "[36mGET /static/js/theme.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 17:27:59] "GET /get-total-dhikr HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:27:59] "GET /get-prayer-times-api HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:27:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:27:59] "[36mGET /static/css/theme.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 17:27:59] "[36mGET /static/js/theme.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 17:28:00] "GET /get-total-dhikr HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:28:00] "GET /get-prayer-times-api HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:28:00] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:28:00] "[36mGET /static/css/theme.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 17:28:00] "[36mGET /static/js/theme.js HTTP/1.1[0m" 304 -
+127.0.0.1 - - [29/May/2025 17:28:00] "GET /get-total-dhikr HTTP/1.1" 200 -
+127.0.0.1 - - [29/May/2025 17:28:00] "GET /get-prayer-times-api HTTP/1.1" 200 -
