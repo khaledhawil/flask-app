@@ -1,63 +1,443 @@
-# Flask App with Jenkins CI/CD Pipeline .
+# Islamic Web Application with CI/CD Pipeline
 
-A Flask web application with user authentication that displays personalized motivational phrases. Users can create accounts, log in, and manage their own custom phrases. The app is integrated with Jenkins for automated build, test, and deployment using Docker.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/khaledhawil/flask-app)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/khaledhawil/flask-app)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
 
-## 🚀 Features
+A comprehensive Islamic web application built with Flask, featuring prayer times, Quran reading, digital tasbeh, hadith collections, and user authentication. The application is fully containerized with Docker and includes a complete Jenkins CI/CD pipeline for automated deployment.
 
-- **User Authentication**: Secure registration and login system
-- **Personalized Phrases**: Each user can create and manage their own motivational quotes
-- **Random Phrase Generator**: Displays user's custom phrases or default inspirational quotes
-- **SQLite Database**: Persistent storage for user accounts and phrases
-- **Dockerized Application**: Containerized Flask app with database persistence
-- **Jenkins CI/CD Pipeline**: Automated build, test, and deployment pipeline
-- **Docker Hub Integration**: Automatic image push to Docker registry
-- **Health Checks**: Automated health monitoring after deployment
-- **Auto-cleanup**: Maintains only the latest Docker images
+## Key Features
 
-## 📋 Prerequisites
+### Islamic Features
+- **Quran Reader**: Complete Quran with multiple translations and audio recitation
+- **Prayer Times**: Accurate prayer times based on user location with notifications
+- **Digital Tasbeh**: Interactive Islamic phrase counter with progress tracking
+- **Hadith Collection**: Comprehensive collection of authentic hadiths from major sources
+- **Personal Duas**: Custom prayer and dua management system
+- **Islamic Calendar**: Hijri calendar integration with Islamic events
 
-- Docker installed on your system
-- Jenkins server with Docker plugin
-- Docker Hub account (for image registry)
-- Git repository access
+### Technical Features
+- **User Authentication**: Secure registration, login, and session management
+- **Personal Dashboard**: User statistics and spiritual progress tracking
+- **Dockerized Application**: Full containerization with volume persistence
+- **CI/CD Pipeline**: Automated Jenkins pipeline for build, test, and deployment
+- **Responsive Design**: Mobile-first design with progressive web app features
+- **Security**: Password hashing, secure sessions, and input validation
 
-## 🏗️ Project Structure
+## Project Architecture
 
 ```
-flask-app/
-├── src/
-│   ├── app.py                 # Main Flask application with auth
-│   └── templates/
-│       ├── index.html         # Home page template
-│       ├── login.html         # Login page template
-│       ├── signup.html        # Registration page template
-│       └── my_phrases.html    # Phrase management page
-├── Dockerfile                 # Docker image configuration
-├── docker-compose.yml         # Docker Compose for local development
-├── requirements.txt           # Python dependencies
-├── Jenkinsfile               # Jenkins pipeline configuration
-├── script.groovy             # Reusable Jenkins functions
-└── README.md                 # This file
+islamic-flask-app/
+├── Docker Configuration
+│   ├── Dockerfile                 # Multi-stage production build
+│   ├── docker-compose.yml         # Local development setup
+│   └── .dockerignore              # Optimized build context
+│
+├── CI/CD Pipeline
+│   ├── Jenkinsfile                # Jenkins pipeline definition
+│   ├── script.groovy              # Reusable pipeline functions
+│   └── tests/                     # Automated testing suite
+│
+├── Application Source
+│   └── src/
+│       ├── app.py                 # Main Flask application
+│       ├── config/                # Application configuration
+│       ├── models/                # Database models
+│       │   ├── user.py           # User authentication model
+│       │   ├── tasbeh.py         # Tasbeh counter model
+│       │   └── database.py       # Database connection manager
+│       ├── routes/                # API and route handlers
+│       │   ├── __init__.py       # Blueprint registration
+│       │   └── islamic_content.py # Quran and Islamic content API
+│       ├── services/              # Business logic services
+│       │   └── prayer_service.py # Prayer times calculation
+│       ├── utils/                 # Utility functions
+│       ├── templates/             # Jinja2 HTML templates
+│       │   ├── base.html         # Base template with navigation
+│       │   ├── index.html        # Homepage with dashboard
+│       │   ├── quran.html        # Quran reader interface
+│       │   ├── prayer_times.html # Prayer schedule display
+│       │   ├── tasbeh.html       # Digital tasbeh counter
+│       │   ├── hadith.html       # Hadith browser
+│       │   └── auth/             # Authentication templates
+│       └── static/               # Static assets
+│           ├── css/              # Stylesheets with Islamic themes
+│           └── js/               # Interactive JavaScript features
+│
+└── Documentation
+    ├── README.md                  # This comprehensive guide
+    └── requirements.txt           # Python dependencies
 ```
+
+## Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- Python 3.11+ (for local development)
+- Jenkins (for CI/CD pipeline)
+- Git
+
+### Docker Deployment (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/khaledhawil/flask-app.git
+cd flask-app
+
+# Start with Docker Compose
+docker-compose up --build -d
+
+# Access the application
+open http://localhost:5000
+```
+
+### Local Development
+
+```bash
+# Create virtual environment
+python3 -m venv islamic_app_env
+source islamic_app_env/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize database
+python src/app.py --init-db
+
+# Run development server
+export FLASK_ENV=development
+python src/app.py
+```
+
+## Application Features
+
+### Islamic Features
+
+#### Quran Reader (`/quran`)
+- Complete Mushaf with all 114 surahs in Arabic text
+- Multiple translations in English, Urdu, and other languages
+- High-quality audio recitation with multiple reciters
+- Search functionality to find verses by keyword or surah
+- Bookmarking system to save favorite verses
+- Reading progress tracking
+
+#### Prayer Times (`/prayer-times`)
+- Location-based automatic detection or manual entry
+- Multiple Islamic calculation methods
+- Browser notifications for prayer times
+- Qibla direction compass pointing to Mecca
+- Monthly prayer schedule calendar
+- Prayer consistency tracking
+
+#### Digital Tasbeh (`/tasbeh`)
+- Interactive counter with touch/click increment
+- Pre-loaded Islamic phrases and dhikr
+- Custom phrases for personal duas and adhkar
+- Daily, weekly, and monthly progress statistics
+- Goal setting and tracking system
+- Mobile haptic feedback support
+
+#### Hadith Collection (`/hadith`)
+- Authentic sources: Bukhari, Muslim, Abu Dawud, Tirmidhi, Ibn Majah
+- Original Arabic text with English translations
+- Search and filter by topic or narrator
+- Daily hadith feature with new hadith each day
+- Favorites system to save important hadiths
+- Social media sharing capabilities
+
+### User Features
+
+#### Authentication System
+- Secure registration with email validation
+- Strong password requirements and hashing
+- Persistent login sessions with security
+- Password recovery via email
+- Profile management and updates
+
+#### Personal Dashboard
+- Spiritual statistics including prayer times and tasbeh counts
+- Achievement system with badges for spiritual milestones
+- Streak tracking for worship consistency
+- Daily goals for Islamic practices
+
+## CI/CD Pipeline
+
+### Jenkins Pipeline Stages
+
+```groovy
+pipeline {
+    agent any
+    
+    stages {
+        stage('Prepare Workspace') {
+            // Clean workspace and checkout code
+        }
+        
+        stage('Build & Push Docker Image') {
+            // Build Docker image with version tags
+            // Push to Docker Hub registry
+        }
+        
+        stage('Deploy Container') {
+            // Deploy to production environment
+            // Configure persistent volumes
+        }
+        
+        stage('Health Check') {
+            // Verify application health
+            // Run automated tests
+        }
+    }
+    
+    post {
+        always {
+            // Cleanup old images
+            // Send notifications
+        }
+    }
+}
+```
+
+### Deployment Features
+- Automated builds triggered by Git commits
+- Docker Hub integration with automatic image versioning
+- Database and user data persistence
+- Continuous application health monitoring
+- Automatic cleanup of old images
+- Build status notifications
+
+## Technology Stack
+
+### Backend
+- **Flask 2.2+**: Modern Python web framework
+- **SQLite**: Lightweight, file-based database
+- **Gunicorn**: WSGI HTTP server for production
+- **Werkzeug**: Security utilities for password hashing
+- **Requests**: HTTP library for external API integration
+
+### Frontend
+- **Jinja2 Templates**: Server-side rendering
+- **Responsive CSS**: Mobile-first design
+- **JavaScript ES6+**: Interactive features
+- **Progressive Web App**: Offline capabilities
+- **Islamic Design**: Authentic Islamic UI patterns
+
+### DevOps & Infrastructure
+- **Docker**: Containerization platform
+- **Jenkins**: CI/CD automation server
+- **Docker Hub**: Container registry
+- **Docker Compose**: Multi-container orchestration
+- **Volume Persistence**: Data backup and recovery
+
+### External APIs
+- **Prayer Times API**: Accurate prayer calculations
+- **Quran API**: Complete Quran text and translations
+- **Hadith API**: Authentic hadith collections
+- **Geolocation API**: Location-based services
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Application Configuration
+SECRET_KEY=your-super-secure-secret-key
+FLASK_ENV=production
+DEBUG=false
+
+# Database Configuration
+DATABASE_URL=sqlite:///app.db
+DB_BACKUP_ENABLED=true
+
+# External API Keys
+PRAYER_TIMES_API_KEY=your-api-key
+QURAN_API_KEY=your-api-key
+
+# Docker Configuration
+DOCKER_REGISTRY=khaledhawil/flask-app
+BUILD_NUMBER=${BUILD_NUMBER}
+```
+
+## Testing & Quality Assurance
+
+### Test Coverage
+```bash
+# Run unit tests
+python -m pytest tests/ -v
+
+# Run integration tests
+python -m pytest tests/integration/ -v
+
+# Generate coverage report
+pytest --cov=src tests/
+```
+
+### Quality Checks
+- **Code Linting**: PEP 8 compliance with flake8
+- **Security Scanning**: Dependency vulnerability checks
+- **Performance Testing**: Load testing with Apache Bench
+- **Accessibility**: WCAG 2.1 compliance testing
+
+##  Monitoring & Analytics
+
+### Health Endpoints
+```bash
+# Application health
+curl http://localhost:5000/health
+
+# Database status
+curl http://localhost:5000/health/db
+
+# External API status
+curl http://localhost:5000/health/apis
+```
+
+### Metrics Dashboard
+- **User Engagement**: Active users, session duration
+- **Feature Usage**: Prayer times, tasbeh, Quran reading
+- **Performance**: Response times, error rates
+- **Infrastructure**: Container health, resource usage
+
+##  Security Features
+
+### Application Security
+- **Password Hashing**: Werkzeug PBKDF2 with salt
+- **CSRF Protection**: Form token validation
+- **Session Security**: Secure cookie configuration
+- **Input Validation**: XSS and injection prevention
+- **Rate Limiting**: API abuse prevention
+
+### Infrastructure Security
+- **🐳 Container Security**: Non-root user execution
+- **🔑 Secret Management**: Environment variable encryption
+- **🌐 HTTPS Ready**: SSL/TLS certificate support
+- **🛡️ Network Isolation**: Docker network segmentation
+
+## 🚀 Production Deployment
+
+### Docker Production Setup
+
+```bash
+# Create production environment
+docker network create islamic-app-network
+
+# Deploy with production configuration
+docker run -d \
+  --name islamic-flask-app \
+  --network islamic-app-network \
+  -p 80:5000 \
+  -v islamic_data:/app/data \
+  -v islamic_logs:/app/logs \
+  -e SECRET_KEY=$(openssl rand -base64 32) \
+  -e FLASK_ENV=production \
+  --restart unless-stopped \
+  khaledhawil/flask-app:latest
+
+# Setup reverse proxy (nginx)
+docker run -d \
+  --name nginx-proxy \
+  --network islamic-app-network \
+  -p 443:443 \
+  -v nginx_certs:/etc/nginx/certs \
+  nginx:alpine
+```
+
+### Scaling & Load Balancing
+
+```yaml
+# docker-compose.prod.yml
+version: '3.8'
+services:
+  web:
+    image: khaledhawil/flask-app:latest
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+  
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+```
+
+## 🤝 Contributing
+
+We welcome contributions to improve this Islamic application! Please follow these guidelines:
+
+### Development Workflow
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/islamic-feature`
+3. **Commit** your changes: `git commit -m 'Add new Islamic feature'`
+4. **Push** to the branch: `git push origin feature/islamic-feature`
+5. **Submit** a pull request
+
+### Contribution Guidelines
+- Follow PEP 8 Python style guidelines
+- Write unit tests for new features
+- Update documentation for API changes
+- Ensure Islamic content accuracy and authenticity
+- Test with both Docker and local development environments
+
+## 📞 Support & Community
+
+### Getting Help
+- **📖 Documentation**: Comprehensive guides and API documentation
+- **🐛 Issue Tracking**: GitHub Issues for bug reports
+- **💬 Discussions**: GitHub Discussions for questions
+- **📧 Contact**: Direct email support for urgent issues
+
+### Community Guidelines
+- Respectful and inclusive communication
+- Focus on Islamic values and teachings
+- Accurate religious content and references
+- Constructive feedback and suggestions
+
+## 👨‍💻 Author & Maintainer
+
+**Khaled Hawil** - Cloud & DevOps Engineer
+- 🌐 **GitHub**: [@khaledhawil](https://github.com/khaledhawil)
+- 📧 **Email**: Khaledhawil91@gmail.com
+- 🔗 **LinkedIn**: [khaledhawil](https://www.linkedin.com/in/khaledhawil/)
+- 🐳 **Docker Hub**: [khaledhawil/flask-app](https://hub.docker.com/r/khaledhawil/flask-app)
+
+
+### Open Source Commitment
+- Free to use for personal and educational purposes
+- Contributions welcome from the global Muslim community
+- Commercial use permitted with attribution
+
+## 🙏 Acknowledgments
+
+- **Islamic Sources**: Quran.com, Hadith APIs, and Islamic scholarly resources
+- **Open Source Community**: Flask, Docker, and Jenkins contributors
+- **Muslim Developers**: Global Islamic tech community
+- **Feedback Providers**: Beta testers and early adopters
+
+---
+
+## 📈 Project Status
+
+- ✅ **Core Features**: Complete and stable
+- ✅ **CI/CD Pipeline**: Fully automated
+- ✅ **Docker Support**: Production-ready
+- ✅ **Security**: Enterprise-grade
+- 🔄 **Active Development**: Regular updates and improvements
+- 📱 **Mobile App**: Coming soon
+
+
 
 ## 🐳 Local Development
 
-### Option 1: Using Docker Compose (Recommended)
-
-1. **Start the application:**
-   ```bash
-   docker-compose up --build
-   ```
-
-2. **Access the app:**
-   Open your browser and go to `http://localhost:5000`
-
-3. **Stop the application:**
-   ```bash
-   docker-compose down
-   ```
-
-### Option 2: Using Virtual Environment
+### Option 1: Using Virtual Environment
 
 1. **Create and activate virtual environment:**
    ```bash
@@ -78,7 +458,7 @@ flask-app/
 4. **Access the app:**
    Open your browser and go to `http://localhost:5000`
 
-### Option 3: Using Docker
+### Option 2: Using Docker
 
 1. **Build the Docker image:**
    ```bash
@@ -357,17 +737,6 @@ docker exec flask-app python -c "import sqlite3; print('DB OK')"
 
 **GitHub Repository**: Automatically triggers Jenkins builds on every commit push
 
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🆘 Support
-
-For issues and questions:
-- Check the troubleshooting section
-- Review Jenkins console logs
-- Create an issue in the repository
-- Test with docker-compose for local debugging
 
 ---
 
