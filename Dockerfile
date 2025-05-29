@@ -21,8 +21,15 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy project
 COPY . .
 
+# Set proper permissions and create data directory
+RUN mkdir -p /app/data && chmod 755 /app/data
+
 # Expose port
 EXPOSE 5000
 
+# Set Python path so imports work correctly
+ENV PYTHONPATH=/app/src
+WORKDIR /app/src
+
 # Run the app with Gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "src.app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
