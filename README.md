@@ -1,4 +1,4 @@
-# Flask App with Jenkins CI/CD Pipeline
+# Flask App with Jenkins CI/CD Pipeline .
 
 A Flask web application with user authentication that displays personalized motivational phrases. Users can create accounts, log in, and manage their own custom phrases. The app is integrated with Jenkins for automated build, test, and deployment using Docker.
 
