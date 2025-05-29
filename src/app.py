@@ -10,6 +10,10 @@ import json
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
+# Register API blueprint
+from routes import api_bp
+app.register_blueprint(api_bp, url_prefix='/api')
+
 # Database initialization
 def init_db():
     # Use persistent data directory
@@ -562,6 +566,22 @@ def quran():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
+    return render_template('enhanced_quran.html', 
+                         username=session.get('username'))
+
+@app.route('/enhanced-quran')
+def enhanced_quran():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('enhanced_quran.html', 
+                         username=session.get('username'))
+
+@app.route('/quran-basic')
+def quran_basic():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
     return render_template('quran.html', 
                          verses=quran_verses, 
                          hadiths=hadith_collection,
@@ -579,4 +599,4 @@ def islamic_content():
 
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=True)
