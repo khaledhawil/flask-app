@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}التطبيق الإسلامي{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body data-theme="dark">
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">🏠 الرئيسية</a>
+                <a href="{{ url_for('my_phrases') }}">💭 عباراتي</a>
+                <a href="{{ url_for('tasbeh') }}">📿 التسبيح</a>
+                <a href="{{ url_for('prayer_times') }}">🕌 أوقات الصلاة</a>
+                <a href="{{ url_for('quran') }}">📖 القرآن</a>
+                {% if username %}
+                <a href="{{ url_for('logout') }}">🚪 تسجيل خروج</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">🔑 تسجيل الدخول</a>
+                <a href="{{ url_for('signup') }}">📝 إنشاء حساب</a>
+                {% endif %}
+                <button id="themeToggleBtn" class="theme-toggle-btn">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+            <div class="user-info">
+                {% if username %}
+                مرحباً بك {{ username }} 👋
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>

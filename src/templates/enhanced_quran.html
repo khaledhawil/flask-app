@@ -654,12 +654,17 @@
 
         // Load all surahs on page load
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔥 Enhanced Quran with Audio-Ayah Synchronization Loaded!');
+            console.log('✅ Auto-play enabled:', autoPlayEnabled);
+            console.log('🎵 Audio synchronization features active!');
+            
             loadSurahs();
             
             // Initialize auto-play button state
             const autoPlayBtn = document.getElementById('autoPlayBtn');
             if (autoPlayBtn && autoPlayEnabled) {
                 autoPlayBtn.classList.add('auto-play-active');
+                console.log('✅ Auto-play button initialized');
             }
             
             // Add search functionality
@@ -906,10 +911,17 @@
             
             // Add highlighting to current ayah
             const currentAyahElement = document.querySelector(`[data-ayah="${ayahNumber}"]`);
+            const currentPlayButton = currentAyahElement ? currentAyahElement.querySelector('.ayah-play-btn') : null;
+            
             if (currentAyahElement) {
                 currentAyahElement.classList.add('playing');
                 currentAyahElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 currentAyah = { element: currentAyahElement, number: ayahNumber, surah: surahNumber };
+            }
+            
+            if (currentPlayButton) {
+                currentPlayButton.classList.add('playing');
+                currentPlayButton.innerHTML = '<i class="fas fa-pause-circle"></i>';
             }
             
             // Use the audio URL from Al-Quran Cloud API if available
@@ -945,11 +957,19 @@
                     if (currentAyahElement) {
                         currentAyahElement.classList.remove('playing');
                     }
+                    if (currentPlayButton) {
+                        currentPlayButton.classList.remove('playing');
+                        currentPlayButton.innerHTML = '<i class="fas fa-play-circle"></i>';
+                    }
                 });
                 
                 currentAudio.addEventListener('play', () => {
                     if (currentAyahElement) {
                         currentAyahElement.classList.add('playing');
+                    }
+                    if (currentPlayButton) {
+                        currentPlayButton.classList.add('playing');
+                        currentPlayButton.innerHTML = '<i class="fas fa-pause-circle"></i>';
                     }
                 });
             } else {
@@ -1041,6 +1061,14 @@
             playingAyahs.forEach(ayah => {
                 ayah.classList.remove('playing');
             });
+            
+            // Reset all play button states
+            const playingButtons = document.querySelectorAll('.ayah-play-btn.playing');
+            playingButtons.forEach(button => {
+                button.classList.remove('playing');
+                button.innerHTML = '<i class="fas fa-play-circle"></i>';
+            });
+            
             currentAyah = null;
         }
 
