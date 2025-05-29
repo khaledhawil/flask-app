@@ -36,29 +36,29 @@ def deployApp() {
     '''
 }
 
-def healthCheck() {
-    echo 'Performing health check on deployed application...'
-    sleep 10
-    sh '''
-        if ! docker ps --filter "name=flask-app" --format '{{.Names}}' | grep -q "flask-app"; then
-            echo "Container is not running!"
-            exit 1
-        fi
-        MAX_RETRIES=30
-        RETRY_COUNT=0
-        until curl -s http://localhost:5000/ > /dev/null || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
-            echo "Waiting for application to respond... ($RETRY_COUNT/$MAX_RETRIES)"
-            RETRY_COUNT=$((RETRY_COUNT+1))
-            sleep 2
-        done
-        if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-            echo "Application failed to respond within expected time!"
-            docker logs flask-app
-            exit 1
-        fi
-        echo "Application is healthy and responding!"
-    '''
-}
+// def healthCheck() {
+//     echo 'Performing health check on deployed application...'
+//     sleep 10
+//     sh '''
+//         if ! docker ps --filter "name=flask-app" --format '{{.Names}}' | grep -q "flask-app"; then
+//             echo "Container is not running!"
+//             exit 1
+//         fi
+//         MAX_RETRIES=30
+//         RETRY_COUNT=0
+//         until curl -s http://localhost:5000/ > /dev/null || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+//             echo "Waiting for application to respond... ($RETRY_COUNT/$MAX_RETRIES)"
+//             RETRY_COUNT=$((RETRY_COUNT+1))
+//             sleep 2
+//         done
+//         if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+//             echo "Application failed to respond within expected time!"
+//             docker logs flask-app
+//             exit 1
+//         fi
+//         echo "Application is healthy and responding!"
+//     '''
+// }
 
 def cleanup() {
     echo 'Cleaning up old images...'

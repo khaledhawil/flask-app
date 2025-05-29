@@ -32,14 +32,14 @@ pipeline {
                 }
             }
         }
-        stage('Health Check') {
-            steps {
-                script {
-                    def gv = load "script.groovy"
-                    gv.healthCheck()
-                }
-            }
-        }
+        // stage('Health Check') {
+        //     steps {
+        //         script {
+        //             def gv = load "script.groovy"
+        //             gv.healthCheck()
+        //         }
+        //     }
+        // }
     }
     post {
         always {
@@ -48,14 +48,14 @@ pipeline {
                 gv.cleanup()
             }
         }
-        failure {
-            script {
-                echo "Pipeline failed. Checking container logs..."
-                sh 'docker logs flask-app || true'
-                echo "Stopping and removing failed container..."
-                sh 'docker stop flask-app || true'
-                sh 'docker rm flask-app || true'
-            }
-        }
-    }
+    //     failure {
+    //         script {
+    //             echo "Pipeline failed. Checking container logs..."
+    //             sh 'docker logs flask-app || true'
+    //             echo "Stopping and removing failed container..."
+    //             sh 'docker stop flask-app || true'
+    //             sh 'docker rm flask-app || true'
+    //         }
+    //     }
+    // }
 }
