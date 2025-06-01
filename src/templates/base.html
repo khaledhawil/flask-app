@@ -8,7 +8,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
     {% block styles %}{% endblock %}
 </head>
-<body data-theme="dark">
+<body data-theme="dark" {% if session.user_id %}class="logged-in" data-user-id="{{ session.user_id }}"{% endif %}>
+    <!-- Sync Status Indicator -->
+    <div id="syncStatus" class="sync-status hidden">
+        <div class="sync-indicator"></div>
+        <span>متزامن</span>
+    </div>
+
     <nav class="navbar">
         <div class="navbar-content">
             <div class="nav-links">
@@ -16,9 +22,11 @@
                 <a href="{{ url_for('my_phrases') }}">💭 عباراتي</a>
                 <a href="{{ url_for('tasbeh') }}">📿 التسبيح</a>
                 <a href="{{ url_for('prayer_times') }}">🕌 أوقات الصلاة</a>
+                <a href="{{ url_for('azkar') }}">🌙 الأذكار</a>
                 <a href="{{ url_for('quran') }}">📖 القرآن</a>
                 <a href="{{ url_for('hadith') }}">🕋 الأحاديث</a>
                 {% if username %}
+                <a href="{{ url_for('user_dashboard') }}">📊 لوحة التحكم</a>
                 <a href="{{ url_for('logout') }}">🚪 تسجيل خروج</a>
                 {% else %}
                 <a href="{{ url_for('login') }}">🔑 تسجيل الدخول</a>
@@ -42,5 +50,38 @@
 
     {% block scripts %}{% endblock %}
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-data-sync.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/data-migration.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prayer-notifications.js') }}"></script>
+    
+    <!-- Development/Testing Scripts -->
+    {% if config.DEBUG %}
+    <script src="{{ url_for('static', filename='js/system-test.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/performance-monitor.js') }}"></script>
+    {% endif %}
+    
+    <script>
+        // Initialize sync status indicator
+        window.addEventListener('load', function() {
+            const syncStatus = document.getElementById('syncStatus');
+            const syncIndicator = syncStatus.querySelector('.sync-indicator');
+            const syncText = syncStatus.querySelector('span');
+            
+            if (window.userDataSync && window.userDataSync.isLoggedIn) {
+                syncStatus.classList.remove('hidden');
+                
+                // Listen for sync events
+                window.addEventListener('userDataSynced', function() {
+                    syncIndicator.className = 'sync-indicator';
+                    syncText.textContent = 'متزامن';
+                });
+                
+                window.addEventListener('syncError', function() {
+                    syncIndicator.className = 'sync-indicator error';
+                    syncText.textContent = 'خطأ في المزامنة';
+                });
+            }
+        });
+    </script>
 </body>
 </html>

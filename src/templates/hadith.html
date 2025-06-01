@@ -909,22 +909,51 @@
         display.innerHTML = html;
     }
 
-    // Favorite functionality
+    // Favorite functionality with user data sync
     function isFavorite(hadithId) {
         return appState.favorites.includes(hadithId);
     }
 
-    function toggleFavorite(hadithId) {
+    async function toggleFavorite(hadithId) {
+        const hadithData = getCurrentHadithData(hadithId);
         const index = appState.favorites.indexOf(hadithId);
+        
         if (index > -1) {
+            // Remove from favorites
             appState.favorites.splice(index, 1);
             showNotification('تم حذف الحديث من المفضلة');
+            
+            // Remove from server if logged in
+            if (window.userDataSync && window.userDataSync.isLoggedIn && hadithData) {
+                await window.userDataSync.removeHadithFavorite(hadithData.collection, hadithData.number);
+            } else {
+                localStorage.setItem('hadithFavorites', JSON.stringify(appState.favorites));
+            }
         } else {
+            // Add to favorites
             appState.favorites.push(hadithId);
             showNotification('تم إضافة الحديث للمفضلة');
+            
+            // Add to server if logged in
+            if (window.userDataSync && window.userDataSync.isLoggedIn && hadithData) {
+                await window.userDataSync.addHadithFavorite({
+                    collection: hadithData.collection,
+                    number: hadithData.number,
+                    text: hadithData.text
+                });
+                
+                // Track first favorite achievement
+                await window.userDataSync.trackFirstFavorite();
+            } else {
+                localStorage.setItem('hadithFavorites', JSON.stringify(appState.favorites));
+            }
+            
+            // Update reading stats and track hadith reading
+            if (window.userDataSync && window.userDataSync.isLoggedIn) {
+                await window.userDataSync.trackHadithReading(1);
+            }
         }
         
-        localStorage.setItem('hadithFavorites', JSON.stringify(appState.favorites));
         updateStats();
         
         // Update heart icon if visible
@@ -934,15 +963,101 @@
         }
     }
 
-    function removeFavorite(hadithId) {
+    async function removeFavorite(hadithId) {
+        const hadithData = getCurrentHadithData(hadithId);
         const index = appState.favorites.indexOf(hadithId);
+        
         if (index > -1) {
             appState.favorites.splice(index, 1);
-            localStorage.setItem('hadithFavorites', JSON.stringify(appState.favorites));
+            
+            // Remove from server if logged in
+            if (window.userDataSync && window.userDataSync.isLoggedIn && hadithData) {
+                await window.userDataSync.removeHadithFavorite(hadithData.collection, hadithData.number);
+            } else {
+                localStorage.setItem('hadithFavorites', JSON.stringify(appState.favorites));
+            }
+            
             updateStats();
             loadFavorites(); // Refresh favorites display
             showNotification('تم حذف الحديث من المفضلة');
         }
+    }
+
+    function getCurrentHadithData(hadithId) {
+        // Extract hadith data from the currently displayed hadith
+        const hadithElement = document.querySelector(`[data-hadith-id="${hadithId}"]`);
+        if (hadithElement) {
+            return {
+                collection: hadithElement.dataset.collection || 'sahih_bukhari',
+                number: parseInt(hadithElement.dataset.number) || parseInt(hadithId),
+                text: hadithElement.querySelector('.hadith-text')?.textContent || ''
+            };
+        }
+        
+        // Fallback: try to extract from current hadith display
+        const currentHadith = document.querySelector('.current-hadith .hadith-text');
+        if (currentHadith) {
+            return {
+                collection: 'sahih_bukhari', // Default collection
+                number: parseInt(hadithId) || 1,
+                text: currentHadith.textContent
+            };
+        }
+        
+        return null;
+    }
+
+    // Initialize user data sync for hadith
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeHadithUserData();
+    });
+
+    async function initializeHadithUserData() {
+        if (!window.userDataSync || !window.userDataSync.isLoggedIn) {
+            return;
+        }
+
+        try {
+            // Load user favorites from server
+            const serverFavorites = await window.userDataSync.getHadithFavorites();
+            
+            // Merge with local favorites if any
+            const localFavorites = JSON.parse(localStorage.getItem('hadithFavorites') || '[]');
+            
+            // Convert server favorites to local format
+            const serverFavoriteIds = serverFavorites.map(fav => `${fav.collection}_${fav.number}`);
+            
+            // Combine and deduplicate
+            appState.favorites = [...new Set([...localFavorites, ...serverFavoriteIds])];
+            
+            // Migrate any local-only favorites to server
+            for (const localId of localFavorites) {
+                if (!serverFavoriteIds.includes(localId)) {
+                    const hadithData = parseHadithId(localId);
+                    if (hadithData) {
+                        await window.userDataSync.addHadithFavorite(hadithData);
+                    }
+                }
+            }
+            
+            updateStats();
+            
+        } catch (error) {
+            console.error('Error initializing hadith user data:', error);
+        }
+    }
+
+    function parseHadithId(hadithId) {
+        // Parse hadith ID in format "collection_number"
+        const parts = hadithId.split('_');
+        if (parts.length >= 2) {
+            return {
+                collection: parts[0],
+                number: parseInt(parts[1]),
+                text: '' // Will be filled when the hadith is viewed
+            };
+        }
+        return null;
     }
 
     // Share and copy functionality
@@ -978,6 +1093,11 @@
         appState.viewedToday++;
         localStorage.setItem('viewedToday', appState.viewedToday.toString());
         updateStats();
+        
+        // Track hadith reading for achievements
+        if (window.userDataSync && window.userDataSync.isLoggedIn) {
+            window.userDataSync.trackHadithReading(1);
+        }
     }
 
     // Show notification

@@ -1,0 +1,628 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم - User Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
+    
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 30px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        border: 2px solid var(--border-color);
+    }
+    
+    .dashboard-title {
+        font-family: 'Amiri', serif;
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    
+    .dashboard-subtitle {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .dashboard-section {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 25px;
+        border: 2px solid var(--border-color);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .section-title {
+        font-family: 'Amiri', serif;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin: 0;
+    }
+    
+    .section-icon {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+    
+    /* Loading States */
+    .loading-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        color: var(--text-muted);
+    }
+    
+    .loading-spinner {
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 10px;
+        }
+        
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .dashboard-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">لوحة التحكم</h1>
+        <p class="dashboard-subtitle">مرحباً بك {{ username }}! إدارة تفضيلاتك وإحصائياتك</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Reading Statistics -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <i class="section-icon fas fa-chart-line"></i>
+                <h2 class="section-title">إحصائيات القراءة</h2>
+            </div>
+            <div id="readingStats" class="stats-container">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+
+        <!-- User Preferences -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <i class="section-icon fas fa-cog"></i>
+                <h2 class="section-title">التفضيلات</h2>
+            </div>
+            <div id="userPreferences" class="preferences-panel">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+
+        <!-- Quran Bookmarks -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <i class="section-icon fas fa-bookmark"></i>
+                <h2 class="section-title">مفضلة القرآن</h2>
+            </div>
+            <div id="quranBookmarks" class="user-list">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+
+        <!-- Hadith Favorites -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <i class="section-icon fas fa-heart"></i>
+                <h2 class="section-title">الأحاديث المفضلة</h2>
+            </div>
+            <div id="hadithFavorites" class="user-list">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Achievements -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <i class="section-icon fas fa-trophy"></i>
+                <h2 class="section-title">الإنجازات الأخيرة</h2>
+            </div>
+            <div id="userAchievements" class="achievements-list">
+                <div class="loading-placeholder">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <i class="section-icon fas fa-bolt"></i>
+                <h2 class="section-title">إجراءات سريعة</h2>
+            </div>
+            <div class="quick-actions">
+                <button class="btn" onclick="exportUserData()">
+                    <i class="fas fa-download"></i>
+                    تصدير البيانات
+                </button>
+                <button class="btn btn-secondary" onclick="clearLocalData()">
+                    <i class="fas fa-broom"></i>
+                    مسح البيانات المحلية
+                </button>
+                <button class="btn btn-secondary" onclick="syncAllData()">
+                    <i class="fas fa-sync"></i>
+                    مزامنة البيانات
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDashboard();
+    });
+
+    async function initializeDashboard() {
+        if (!window.userDataSync || !window.userDataSync.isLoggedIn) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            // Load all dashboard data
+            await Promise.all([
+                loadReadingStats(),
+                loadUserPreferences(),
+                loadQuranBookmarks(),
+                loadHadithFavorites(),
+                loadUserAchievements()
+            ]);
+        } catch (error) {
+            console.error('Error initializing dashboard:', error);
+            showError('حدث خطأ في تحميل البيانات');
+        }
+    }
+
+    async function loadReadingStats() {
+        try {
+            const stats = await window.userDataSync.getReadingStats();
+            displayReadingStats(stats);
+        } catch (error) {
+            console.error('Error loading reading stats:', error);
+            document.getElementById('readingStats').innerHTML = '<p class="error">خطأ في تحميل الإحصائيات</p>';
+        }
+    }
+
+    function displayReadingStats(stats) {
+        const container = document.getElementById('readingStats');
+        container.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-number">${stats.quran_verses_read || 0}</div>
+                <div class="stat-label">آيات قرآنية</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🕋</div>
+                <div class="stat-number">${stats.hadiths_read || 0}</div>
+                <div class="stat-label">أحاديث شريفة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-number">${stats.daily_reading_streak || 0}</div>
+                <div class="stat-label">أيام متتالية</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-number">${stats.total_reading_days || 0}</div>
+                <div class="stat-label">إجمالي الأيام</div>
+            </div>
+        `;
+    }
+
+    async function loadUserPreferences() {
+        try {
+            const preferences = await window.userDataSync.loadUserPreferences();
+            displayUserPreferences(preferences);
+        } catch (error) {
+            console.error('Error loading preferences:', error);
+            document.getElementById('userPreferences').innerHTML = '<p class="error">خطأ في تحميل التفضيلات</p>';
+        }
+    }
+
+    function displayUserPreferences(preferences) {
+        const container = document.getElementById('userPreferences');
+        container.innerHTML = `
+            <div class="preferences-group">
+                <h4>المظهر</h4>
+                <div class="preference-item">
+                    <label>المظهر:</label>
+                    <select id="themeSelect" onchange="updatePreference('theme', this.value)">
+                        <option value="dark" ${preferences.theme === 'dark' ? 'selected' : ''}>داكن</option>
+                        <option value="light" ${preferences.theme === 'light' ? 'selected' : ''}>فاتح</option>
+                    </select>
+                </div>
+                <div class="preference-item">
+                    <label>اللغة:</label>
+                    <select id="languageSelect" onchange="updatePreference('language_preference', this.value)">
+                        <option value="ar" ${preferences.language_preference === 'ar' ? 'selected' : ''}>العربية</option>
+                        <option value="en" ${preferences.language_preference === 'en' ? 'selected' : ''}>English</option>
+                    </select>
+                </div>
+            </div>
+            <div class="preferences-group">
+                <h4>القراءة</h4>
+                <div class="preference-item">
+                    <label>الهدف اليومي:</label>
+                    <input type="number" id="dailyGoalInput" value="${preferences.daily_goal || 100}" 
+                           onchange="updatePreference('daily_goal', parseInt(this.value))" min="1" max="1000">
+                </div>
+                <div class="preference-item">
+                    <label>تشغيل الصوت:</label>
+                    <input type="checkbox" id="soundEnabledCheck" ${preferences.sound_enabled ? 'checked' : ''}
+                           onchange="updatePreference('sound_enabled', this.checked)">
+                </div>
+            </div>
+            <div class="preferences-group">
+                <h4>إشعارات الصلاة</h4>
+                <div class="preference-item">
+                    <label>تفعيل الإشعارات:</label>
+                    <input type="checkbox" id="prayerNotificationsCheck" 
+                           ${Object.keys(preferences.prayer_notifications || {}).length > 0 ? 'checked' : ''}
+                           onchange="togglePrayerNotifications(this.checked)">
+                </div>
+            </div>
+        `;
+    }
+
+    async function updatePreference(key, value) {
+        try {
+            const currentPrefs = await window.userDataSync.loadUserPreferences();
+            currentPrefs[key] = value;
+            await window.userDataSync.updateUserPreferences(currentPrefs);
+            showMessage('تم حفظ التفضيلات', 'success');
+        } catch (error) {
+            console.error('Error updating preference:', error);
+            showMessage('خطأ في حفظ التفضيلات', 'error');
+        }
+    }
+
+    async function loadQuranBookmarks() {
+        try {
+            const bookmarks = await window.userDataSync.getQuranBookmarks();
+            displayQuranBookmarks(bookmarks);
+        } catch (error) {
+            console.error('Error loading Quran bookmarks:', error);
+            document.getElementById('quranBookmarks').innerHTML = '<p class="error">خطأ في تحميل المفضلة</p>';
+        }
+    }
+
+    function displayQuranBookmarks(bookmarks) {
+        const container = document.getElementById('quranBookmarks');
+        
+        if (bookmarks.length === 0) {
+            container.innerHTML = '<p class="empty-state">لا توجد مفضلة حالياً</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="user-list-header">المفضلة (${bookmarks.length})</div>
+            ${bookmarks.slice(0, 5).map(bookmark => `
+                <div class="user-list-item">
+                    <div class="item-content">
+                        <div class="item-title">سورة ${bookmark.surah_number} - آية ${bookmark.ayah_number}</div>
+                        <div class="item-subtitle">${bookmark.note || ''}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="goToQuranBookmark(${bookmark.surah_number}, ${bookmark.ayah_number})" title="انتقال">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                        <button class="btn-icon remove" onclick="removeQuranBookmark(${bookmark.surah_number}, ${bookmark.ayah_number})" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+            ${bookmarks.length > 5 ? `<div class="view-all"><a href="/quran">عرض الكل (${bookmarks.length})</a></div>` : ''}
+        `;
+    }
+
+    async function loadHadithFavorites() {
+        try {
+            const favorites = await window.userDataSync.getHadithFavorites();
+            displayHadithFavorites(favorites);
+        } catch (error) {
+            console.error('Error loading hadith favorites:', error);
+            document.getElementById('hadithFavorites').innerHTML = '<p class="error">خطأ في تحميل المفضلة</p>';
+        }
+    }
+
+    function displayHadithFavorites(favorites) {
+        const container = document.getElementById('hadithFavorites');
+        
+        if (favorites.length === 0) {
+            container.innerHTML = '<p class="empty-state">لا توجد أحاديث مفضلة حالياً</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="user-list-header">المفضلة (${favorites.length})</div>
+            ${favorites.slice(0, 5).map(favorite => `
+                <div class="user-list-item">
+                    <div class="item-content">
+                        <div class="item-title">${favorite.collection} - ${favorite.number}</div>
+                        <div class="item-subtitle">${(favorite.text || '').substring(0, 100)}...</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="goToHadithFavorite('${favorite.collection}', ${favorite.number})" title="انتقال">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                        <button class="btn-icon remove" onclick="removeHadithFavorite('${favorite.collection}', ${favorite.number})" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+            ${favorites.length > 5 ? `<div class="view-all"><a href="/hadith">عرض الكل (${favorites.length})</a></div>` : ''}
+        `;
+    }
+
+    async function loadUserAchievements() {
+        try {
+            const achievements = await fetch('/api/user/achievements').then(r => r.json());
+            displayUserAchievements(achievements);
+        } catch (error) {
+            console.error('Error loading achievements:', error);
+            document.getElementById('userAchievements').innerHTML = '<p class="error">خطأ في تحميل الإنجازات</p>';
+        }
+    }
+
+    function displayUserAchievements(achievements) {
+        const container = document.getElementById('userAchievements');
+        
+        if (achievements.length === 0) {
+            container.innerHTML = '<p class="empty-state">لا توجد إنجازات حالياً</p>';
+            return;
+        }
+
+        const recentAchievements = achievements.slice(0, 3);
+        container.innerHTML = recentAchievements.map(achievement => `
+            <div class="achievement-item">
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-content">
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-date">${new Date(achievement.earned_at).toLocaleDateString('ar-SA')}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Action functions
+    function goToQuranBookmark(surahNumber, ayahNumber) {
+        window.open(`/quran#surah-${surahNumber}-ayah-${ayahNumber}`, '_blank');
+    }
+
+    async function removeQuranBookmark(surahNumber, ayahNumber) {
+        if (confirm('هل تريد حذف هذه المفضلة؟')) {
+            try {
+                await window.userDataSync.removeQuranBookmark(surahNumber, ayahNumber);
+                await loadQuranBookmarks();
+                showMessage('تم حذف المفضلة', 'success');
+            } catch (error) {
+                showMessage('خطأ في حذف المفضلة', 'error');
+            }
+        }
+    }
+
+    function goToHadithFavorite(collection, number) {
+        window.open(`/hadith#${collection}-${number}`, '_blank');
+    }
+
+    async function removeHadithFavorite(collection, number) {
+        if (confirm('هل تريد حذف هذا الحديث من المفضلة؟')) {
+            try {
+                await window.userDataSync.removeHadithFavorite(collection, number);
+                await loadHadithFavorites();
+                showMessage('تم حذف الحديث من المفضلة', 'success');
+            } catch (error) {
+                showMessage('خطأ في حذف المفضلة', 'error');
+            }
+        }
+    }
+
+    async function exportUserData() {
+        try {
+            const data = {
+                preferences: await window.userDataSync.loadUserPreferences(),
+                bookmarks: await window.userDataSync.getQuranBookmarks(),
+                favorites: await window.userDataSync.getHadithFavorites(),
+                stats: await window.userDataSync.getReadingStats(),
+                achievements: await fetch('/api/user/achievements').then(r => r.json())
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `islamic-app-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showMessage('تم تصدير البيانات بنجاح', 'success');
+        } catch (error) {
+            console.error('Error exporting data:', error);
+            showMessage('خطأ في تصدير البيانات', 'error');
+        }
+    }
+
+    function clearLocalData() {
+        if (confirm('هل تريد مسح جميع البيانات المحلية؟ (البيانات على الخادم ستبقى آمنة)')) {
+            window.userDataSync.clearLocalStorageData();
+            showMessage('تم مسح البيانات المحلية', 'success');
+        }
+    }
+
+    async function syncAllData() {
+        try {
+            await window.userDataSync.syncData();
+            await initializeDashboard();
+            showMessage('تمت المزامنة بنجاح', 'success');
+        } catch (error) {
+            console.error('Error syncing data:', error);
+            showMessage('خطأ في المزامنة', 'error');
+        }
+    }
+
+    function togglePrayerNotifications(enabled) {
+        // Implementation for prayer notifications toggle
+        updatePreference('prayer_notifications', enabled ? {'fajr': true, 'dhuhr': true, 'asr': true, 'maghrib': true, 'isha': true} : {});
+    }
+
+    function showMessage(message, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? 'var(--error-color)' : 'var(--info-color)'};
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 4000);
+    }
+
+    function showError(message) {
+        showMessage(message, 'error');
+    }
+</script>
+
+<style>
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .quick-actions .btn {
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .achievement-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .achievement-item:last-child {
+        border-bottom: none;
+    }
+
+    .achievement-icon {
+        font-size: 1.5rem;
+    }
+
+    .achievement-content {
+        flex: 1;
+    }
+
+    .achievement-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .achievement-date {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 20px;
+        font-style: italic;
+    }
+
+    .error {
+        color: var(--error-color);
+        text-align: center;
+        padding: 20px;
+    }
+
+    .view-all {
+        text-align: center;
+        padding: 10px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .view-all a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .view-all a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

@@ -541,6 +541,164 @@
                 font-size: 1.5em;
             }
         }
+
+        /* Bookmark and User Data Styles */
+        .ayah-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .bookmark-btn {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+            padding: 6px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .bookmark-btn:hover {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+
+        .bookmark-btn.bookmarked {
+            background: linear-gradient(45deg, #ffd700, #f59e0b);
+            color: #1a1a1a;
+            border-color: #ffd700;
+        }
+
+        .bookmarks-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .bookmarks-section h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-family: 'Amiri', serif;
+        }
+
+        .bookmarks-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .bookmark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bookmark-item:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .btn-remove {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remove:hover {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+        }
+
+        .ayah.highlighted {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+            border-left: 4px solid #ffd700;
+            padding-left: 15px;
+            animation: highlightPulse 3s ease-in-out;
+        }
+
+        @keyframes highlightPulse {
+            0%, 100% {
+                background: linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
+            }
+            50% {
+                background: linear-gradient(90deg, rgba(255, 215, 0, 0.5), rgba(255, 215, 0, 0.2));
+            }
+        }
+
+        .message {
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Reading Progress Indicators */
+        .ayah.reading-progress {
+            position: relative;
+        }
+
+        .ayah.reading-progress::before {
+            content: '✓';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* Dark theme adjustments for user data features */
+        [data-theme="dark"] .bookmark-item {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="dark"] .bookmark-item:hover {
+            background: rgba(255, 215, 0, 0.15);
+        }
+
+        /* Light theme adjustments */
+        [data-theme="light"] .bookmark-btn {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: var(--primary-color);
+        }
+
+        [data-theme="light"] .bookmark-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        [data-theme="light"] .bookmark-item {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="light"] .bookmark-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
     </style>
 {% endblock %}
 
@@ -1147,6 +1305,346 @@
                 currentAudio.addEventListener('pause', updatePlayIcon);
                 currentAudio.addEventListener('play', updatePlayIcon);
             }
+            
+            // Initialize user data sync for Quran
+            initializeQuranUserData();
         });
+
+        // User Data Sync Functions for Quran
+        function initializeQuranUserData() {
+            // Load user bookmarks and reading progress
+            loadUserBookmarks();
+            
+            // Add bookmark buttons to ayahs
+            addBookmarkButtons();
+            
+            // Track reading progress
+            trackReadingProgress();
+            
+            // Listen for user preferences changes
+            window.addEventListener('userPreferencesLoaded', function(event) {
+                applyQuranPreferences(event.detail);
+            });
+        }
+
+        async function loadUserBookmarks() {
+            if (!window.userDataSync) return;
+            
+            try {
+                const bookmarks = await window.userDataSync.getQuranBookmarks();
+                displayBookmarks(bookmarks);
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+            }
+        }
+
+        function addBookmarkButtons() {
+            // Add this to the ayah rendering function
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1 && node.classList && node.classList.contains('ayah')) {
+                                addBookmarkButtonToAyah(node);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.getElementById('surahContent'), {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        function addBookmarkButtonToAyah(ayahElement) {
+            const surahNumber = getCurrentSurahNumber();
+            const ayahNumber = ayahElement.dataset.ayah;
+            
+            if (!surahNumber || !ayahNumber) return;
+            
+            const bookmarkBtn = document.createElement('button');
+            bookmarkBtn.className = 'bookmark-btn';
+            bookmarkBtn.title = 'إضافة إلى المفضلة';
+            bookmarkBtn.innerHTML = '<i class="far fa-bookmark"></i>';
+            bookmarkBtn.onclick = () => toggleBookmark(surahNumber, ayahNumber, bookmarkBtn);
+            
+            // Check if already bookmarked
+            checkBookmarkStatus(surahNumber, ayahNumber, bookmarkBtn);
+            
+            // Add to ayah controls
+            const ayahControls = ayahElement.querySelector('.ayah-controls') || createAyahControls(ayahElement);
+            ayahControls.appendChild(bookmarkBtn);
+        }
+
+        function createAyahControls(ayahElement) {
+            const controls = document.createElement('div');
+            controls.className = 'ayah-controls';
+            ayahElement.appendChild(controls);
+            return controls;
+        }
+
+        async function checkBookmarkStatus(surahNumber, ayahNumber, button) {
+            if (!window.userDataSync) return;
+            
+            try {
+                const bookmarks = await window.userDataSync.getQuranBookmarks();
+                const isBookmarked = bookmarks.some(b => 
+                    b.surah_number == surahNumber && b.ayah_number == ayahNumber
+                );
+                
+                if (isBookmarked) {
+                    button.classList.add('bookmarked');
+                    button.innerHTML = '<i class="fas fa-bookmark"></i>';
+                    button.title = 'إزالة من المفضلة';
+                }
+            } catch (error) {
+                console.error('Error checking bookmark status:', error);
+            }
+        }
+
+        async function toggleBookmark(surahNumber, ayahNumber, button) {
+            if (!window.userDataSync) {
+                alert('يجب تسجيل الدخول لحفظ المفضلة');
+                return;
+            }
+            
+            const isBookmarked = button.classList.contains('bookmarked');
+            
+            try {
+                if (isBookmarked) {
+                    const success = await window.userDataSync.removeQuranBookmark(surahNumber, ayahNumber);
+                    if (success) {
+                        button.classList.remove('bookmarked');
+                        button.innerHTML = '<i class="far fa-bookmark"></i>';
+                        button.title = 'إضافة إلى المفضلة';
+                        showMessage('تم إزالة الآية من المفضلة', 'success');
+                    }
+                } else {
+                    const bookmark = {
+                        surah_number: surahNumber,
+                        ayah_number: ayahNumber,
+                        note: `سورة ${getCurrentSurahName()} - آية ${ayahNumber}`
+                    };
+                    
+                    const success = await window.userDataSync.addQuranBookmark(bookmark);
+                    if (success) {
+                        button.classList.add('bookmarked');
+                        button.innerHTML = '<i class="fas fa-bookmark"></i>';
+                        button.title = 'إزالة من المفضلة';
+                        showMessage('تم إضافة الآية إلى المفضلة', 'success');
+                        
+                        // Track first bookmark achievement
+                        await window.userDataSync.trackFirstBookmark();
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling bookmark:', error);
+                showMessage('حدث خطأ في حفظ المفضلة', 'error');
+            }
+        }
+
+        function trackReadingProgress() {
+            // Track when user reads an ayah (scrolls to it or plays audio)
+            const ayahElements = document.querySelectorAll('.ayah');
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+                        const ayahElement = entry.target;
+                        const surahNumber = getCurrentSurahNumber();
+                        const ayahNumber = ayahElement.dataset.ayah;
+                        
+                        if (surahNumber && ayahNumber) {
+                            updateReadingProgress(surahNumber, ayahNumber);
+                        }
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            ayahElements.forEach(function(ayah) {
+                observer.observe(ayah);
+            });
+        }
+
+        async function updateReadingProgress(surahNumber, ayahNumber) {
+            if (!window.userDataSync) return;
+            
+            try {
+                // Update reading streak (simplified logic)
+                const today = new Date().toDateString();
+                const lastReadDate = localStorage.getItem('lastQuranReadDate');
+                let streak = parseInt(localStorage.getItem('quranReadingStreak') || '0');
+                
+                if (lastReadDate !== today) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    
+                    if (lastReadDate === yesterday.toDateString()) {
+                        streak += 1;
+                    } else if (lastReadDate !== today) {
+                        streak = 1;
+                    }
+                    
+                    localStorage.setItem('lastQuranReadDate', today);
+                    localStorage.setItem('quranReadingStreak', streak.toString());
+                }
+                
+                await window.userDataSync.updateQuranProgress(surahNumber, ayahNumber, streak);
+                await window.userDataSync.updateReadingStats({ quran_verses_read: 1 });
+                
+                // Use the new achievement tracking method
+                await window.userDataSync.trackQuranReading(1);
+                
+                // Check for achievements
+                checkReadingAchievements(streak);
+                
+            } catch (error) {
+                console.error('Error updating reading progress:', error);
+            }
+        }
+
+        async function checkReadingAchievements(streak) {
+            if (!window.userDataSync) return;
+            
+            // Check for streak achievements
+            if (streak === 7) {
+                await window.userDataSync.addAchievement('reading_streak', 'أسبوع من القراءة المستمرة! 📖', { streak: 7 });
+            } else if (streak === 30) {
+                await window.userDataSync.addAchievement('reading_streak', 'شهر من القراءة المستمرة! 🏆', { streak: 30 });
+            } else if (streak === 100) {
+                await window.userDataSync.addAchievement('reading_streak', 'مائة يوم من القراءة! 🎉', { streak: 100 });
+            }
+        }
+
+        function applyQuranPreferences(preferences) {
+            // Apply reciter preference
+            if (preferences.favorite_reciter) {
+                const reciterSelect = document.getElementById('reciterSelect');
+                if (reciterSelect) {
+                    reciterSelect.value = preferences.favorite_reciter;
+                }
+            }
+            
+            // Apply other Quran-specific preferences
+            if (preferences.language_preference) {
+                // Update display language if needed
+                updateDisplayLanguage(preferences.language_preference);
+            }
+        }
+
+        function displayBookmarks(bookmarks) {
+            // Add a bookmarks section to the UI
+            if (bookmarks.length === 0) return;
+            
+            const bookmarksSection = document.createElement('div');
+            bookmarksSection.className = 'bookmarks-section';
+            bookmarksSection.innerHTML = `
+                <h3>المفضلة (${bookmarks.length})</h3>
+                <div class="bookmarks-list">
+                    ${bookmarks.map(bookmark => `
+                        <div class="bookmark-item" onclick="goToBookmark(${bookmark.surah_number}, ${bookmark.ayah_number})">
+                            <span>سورة ${getSurahNameById(bookmark.surah_number)} - آية ${bookmark.ayah_number}</span>
+                            <button onclick="event.stopPropagation(); removeBookmark(${bookmark.surah_number}, ${bookmark.ayah_number})" class="btn-remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            const controls = document.querySelector('.controls');
+            controls.appendChild(bookmarksSection);
+        }
+
+        async function goToBookmark(surahNumber, ayahNumber) {
+            // Load the surah and scroll to the specific ayah
+            await loadSurah(surahNumber);
+            
+            setTimeout(() => {
+                const ayahElement = document.querySelector(`[data-ayah="${ayahNumber}"]`);
+                if (ayahElement) {
+                    ayahElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    ayahElement.classList.add('highlighted');
+                    
+                    setTimeout(() => {
+                        ayahElement.classList.remove('highlighted');
+                    }, 3000);
+                }
+            }, 500);
+        }
+
+        async function removeBookmark(surahNumber, ayahNumber) {
+            if (!window.userDataSync) return;
+            
+            try {
+                const success = await window.userDataSync.removeQuranBookmark(surahNumber, ayahNumber);
+                if (success) {
+                    showMessage('تم إزالة الآية من المفضلة', 'success');
+                    // Refresh bookmarks display
+                    await loadUserBookmarks();
+                }
+            } catch (error) {
+                console.error('Error removing bookmark:', error);
+                showMessage('حدث خطأ في إزالة المفضلة', 'error');
+            }
+        }
+
+        function getCurrentSurahNumber() {
+            // Extract current surah number from the URL or current state
+            const surahContent = document.getElementById('surahContent');
+            const surahElement = surahContent.querySelector('.surah');
+            return surahElement ? surahElement.dataset.surahNumber : null;
+        }
+
+        function getCurrentSurahName() {
+            const surahElement = document.querySelector('.surah');
+            if (surahElement) {
+                const titleElement = surahElement.querySelector('.surah-title');
+                return titleElement ? titleElement.textContent : '';
+            }
+            return '';
+        }
+
+        function getSurahNameById(id) {
+            const surah = surahs.find(s => s.number == id);
+            return surah ? surah.name : `${id}`;
+        }
+
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--success-color)' : type === 'error' ? 'var(--error-color)' : 'var(--info-color)'};
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                z-index: 1001;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        function updateDisplayLanguage(language) {
+            // Update UI elements based on language preference
+            if (language === 'en') {
+                // Switch to English labels if needed
+                document.documentElement.lang = 'en';
+                document.documentElement.dir = 'ltr';
+            } else {
+                document.documentElement.lang = 'ar';
+                document.documentElement.dir = 'rtl';
+            }
+        }
     </script>
 {% endblock %}

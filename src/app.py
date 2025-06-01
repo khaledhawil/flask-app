@@ -95,6 +95,93 @@ def init_db():
         )
     ''')
     
+    # User preferences table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_preferences (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE,
+            theme TEXT DEFAULT 'light',
+            daily_goal INTEGER DEFAULT 100,
+            sound_enabled BOOLEAN DEFAULT 1,
+            prayer_notifications TEXT DEFAULT '{}',
+            language_preference TEXT DEFAULT 'ar',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Quran reading progress table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quran_progress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            surah_number INTEGER,
+            ayah_number INTEGER,
+            total_ayahs_read INTEGER DEFAULT 0,
+            last_read_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            reading_streak INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            UNIQUE(user_id, surah_number, ayah_number)
+        )
+    ''')
+    
+    # Quran bookmarks table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quran_bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            surah_number INTEGER,
+            ayah_number INTEGER,
+            note TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            UNIQUE(user_id, surah_number, ayah_number)
+        )
+    ''')
+    
+    # Hadith favorites table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS hadith_favorites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            hadith_collection TEXT NOT NULL,
+            hadith_number INTEGER NOT NULL,
+            hadith_text TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            UNIQUE(user_id, hadith_collection, hadith_number)
+        )
+    ''')
+    
+    # User reading statistics
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_reading_stats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE,
+            quran_verses_read INTEGER DEFAULT 0,
+            hadiths_read INTEGER DEFAULT 0,
+            daily_reading_streak INTEGER DEFAULT 0,
+            total_reading_days INTEGER DEFAULT 0,
+            last_reading_date DATE,
+            favorite_reciter TEXT DEFAULT 'ar.alafasy',
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # User achievements table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_achievements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            achievement_type TEXT NOT NULL,
+            achievement_name TEXT NOT NULL,
+            achievement_data TEXT DEFAULT '{}',
+            earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -1072,46 +1159,14 @@ def hadith():
     username = session.get('username')
     return render_template('hadith.html', username=username)
 
-@app.route('/api/hadith/editions')
-def get_hadith_editions():
-    """Get all available hadith editions"""
-    try:
-        response = requests.get(
-            'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions.json',
-            timeout=10
-        )
-        if response.status_code == 200:
-            return jsonify({'success': True, 'editions': response.json()})
-        else:
-            return jsonify({'success': False, 'error': 'Failed to fetch editions'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-@app.route('/api/hadith/<book>/<int:number>')
-def get_hadith_by_number(book, number):
-    """Get specific hadith by book and number"""
-    try:
-        url = f'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/{book}/{number}.json'
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            return jsonify({'success': True, 'hadith': response.json()})
-        else:
-            return jsonify({'success': False, 'error': 'Hadith not found'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-@app.route('/api/hadith/<book>/<int:start>-<int:end>')
-def get_hadith_range(book, start, end):
-    """Get range of hadiths"""
-    try:
-        url = f'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/{book}/{start}-{end}.json'
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            return jsonify({'success': True, 'hadiths': response.json()})
-        else:
-            return jsonify({'success': False, 'error': 'Hadiths not found'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+@app.route('/azkar')
+def azkar():
+    """Azkar (Islamic remembrance) page with comprehensive collection"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    username = session.get('username')
+    return render_template('azkar.html', username=username)
 
 @app.route('/favicon.ico')
 def favicon():
@@ -1166,6 +1221,495 @@ def api_user_stats():
         'days_since_registration': days_since_registration,
         'username': session.get('username', 'مستخدم')
     })
+
+# User Preferences API Endpoints
+@app.route('/api/user/preferences', methods=['GET'])
+def get_user_preferences():
+    """Get user preferences"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT theme, daily_goal, sound_enabled, prayer_notifications, language_preference
+        FROM user_preferences WHERE user_id = ?
+    ''', (session['user_id'],))
+    
+    result = cursor.fetchone()
+    conn.close()
+    
+    if result:
+        preferences = {
+            'theme': result[0],
+            'daily_goal': result[1],
+            'sound_enabled': bool(result[2]),
+            'prayer_notifications': json.loads(result[3]) if result[3] else {},
+            'language_preference': result[4]
+        }
+    else:
+        # Create default preferences
+        preferences = {
+            'theme': 'light',
+            'daily_goal': 100,
+            'sound_enabled': True,
+            'prayer_notifications': {},
+            'language_preference': 'ar'
+        }
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT OR REPLACE INTO user_preferences 
+            (user_id, theme, daily_goal, sound_enabled, prayer_notifications, language_preference)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (session['user_id'], preferences['theme'], preferences['daily_goal'], 
+              preferences['sound_enabled'], json.dumps(preferences['prayer_notifications']), 
+              preferences['language_preference']))
+        conn.commit()
+        conn.close()
+    
+    return jsonify(preferences)
+
+@app.route('/api/user/preferences', methods=['POST'])
+def update_user_preferences():
+    """Update user preferences"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Update preferences
+    cursor.execute('''
+        INSERT OR REPLACE INTO user_preferences 
+        (user_id, theme, daily_goal, sound_enabled, prayer_notifications, language_preference, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ''', (
+        session['user_id'],
+        data.get('theme', 'light'),
+        data.get('daily_goal', 100),
+        data.get('sound_enabled', True),
+        json.dumps(data.get('prayer_notifications', {})),
+        data.get('language_preference', 'ar')
+    ))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Preferences updated successfully'})
+
+# Quran Progress API Endpoints
+@app.route('/api/user/quran/progress', methods=['GET'])
+def get_quran_progress():
+    """Get user's Quran reading progress"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT surah_number, ayah_number, total_ayahs_read, last_read_date, reading_streak
+        FROM quran_progress WHERE user_id = ?
+        ORDER BY last_read_date DESC
+    ''', (session['user_id'],))
+    
+    progress_data = []
+    for row in cursor.fetchall():
+        progress_data.append({
+            'surah_number': row[0],
+            'ayah_number': row[1],
+            'total_ayahs_read': row[2],
+            'last_read_date': row[3],
+            'reading_streak': row[4]
+        })
+    
+    conn.close()
+    return jsonify(progress_data)
+
+@app.route('/api/user/quran/progress', methods=['POST'])
+def update_quran_progress():
+    """Update user's Quran reading progress"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data or 'surah_number' not in data or 'ayah_number' not in data:
+        return jsonify({'error': 'Surah and ayah numbers required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Update progress
+    cursor.execute('''
+        INSERT OR REPLACE INTO quran_progress 
+        (user_id, surah_number, ayah_number, total_ayahs_read, last_read_date, reading_streak)
+        VALUES (?, ?, ?, COALESCE((SELECT total_ayahs_read FROM quran_progress WHERE user_id = ? AND surah_number = ? AND ayah_number = ?), 0) + 1, CURRENT_TIMESTAMP, ?)
+    ''', (
+        session['user_id'],
+        data['surah_number'],
+        data['ayah_number'],
+        session['user_id'],
+        data['surah_number'],
+        data['ayah_number'],
+        data.get('reading_streak', 1)
+    ))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Progress updated successfully'})
+
+# Quran Bookmarks API Endpoints
+@app.route('/api/user/quran/bookmarks', methods=['GET'])
+def get_quran_bookmarks():
+    """Get user's Quran bookmarks"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT surah_number, ayah_number, note, created_at
+        FROM quran_bookmarks WHERE user_id = ?
+        ORDER BY created_at DESC
+    ''', (session['user_id'],))
+    
+    bookmarks = []
+    for row in cursor.fetchall():
+        bookmarks.append({
+            'surah_number': row[0],
+            'ayah_number': row[1],
+            'note': row[2],
+            'created_at': row[3]
+        })
+    
+    conn.close()
+    return jsonify(bookmarks)
+
+@app.route('/api/user/quran/bookmarks', methods=['POST'])
+def add_quran_bookmark():
+    """Add a Quran bookmark"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data or 'surah_number' not in data or 'ayah_number' not in data:
+        return jsonify({'error': 'Surah and ayah numbers required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            INSERT INTO quran_bookmarks (user_id, surah_number, ayah_number, note)
+            VALUES (?, ?, ?, ?)
+        ''', (
+            session['user_id'],
+            data['surah_number'],
+            data['ayah_number'],
+            data.get('note', '')
+        ))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Bookmark added successfully'})
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({'error': 'Bookmark already exists'}), 400
+
+@app.route('/api/user/quran/bookmarks', methods=['DELETE'])
+def remove_quran_bookmark():
+    """Remove a Quran bookmark"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data or 'surah_number' not in data or 'ayah_number' not in data:
+        return jsonify({'error': 'Surah and ayah numbers required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        DELETE FROM quran_bookmarks 
+        WHERE user_id = ? AND surah_number = ? AND ayah_number = ?
+    ''', (session['user_id'], data['surah_number'], data['ayah_number']))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Bookmark removed successfully'})
+
+# Hadith Favorites API Endpoints
+@app.route('/api/user/hadith/favorites', methods=['GET'])
+def get_hadith_favorites():
+    """Get user's favorite hadiths"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT hadith_collection, hadith_number, hadith_text, created_at
+        FROM hadith_favorites WHERE user_id = ?
+        ORDER BY created_at DESC
+    ''', (session['user_id'],))
+    
+    favorites = []
+    for row in cursor.fetchall():
+        favorites.append({
+            'collection': row[0],
+            'number': row[1],
+            'text': row[2],
+            'created_at': row[3]
+        })
+    
+    conn.close()
+    return jsonify(favorites)
+
+@app.route('/api/user/hadith/favorites', methods=['POST'])
+def add_hadith_favorite():
+    """Add a hadith to favorites"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data or 'collection' not in data or 'number' not in data:
+        return jsonify({'error': 'Collection and hadith number required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            INSERT INTO hadith_favorites (user_id, hadith_collection, hadith_number, hadith_text)
+            VALUES (?, ?, ?, ?)
+        ''', (
+            session['user_id'],
+            data['collection'],
+            data['number'],
+            data.get('text', '')
+        ))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Hadith added to favorites'})
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({'error': 'Hadith already in favorites'}), 400
+
+@app.route('/api/user/hadith/favorites', methods=['DELETE'])
+def remove_hadith_favorite():
+    """Remove a hadith from favorites"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data or 'collection' not in data or 'number' not in data:
+        return jsonify({'error': 'Collection and hadith number required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        DELETE FROM hadith_favorites 
+        WHERE user_id = ? AND hadith_collection = ? AND hadith_number = ?
+    ''', (session['user_id'], data['collection'], data['number']))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Hadith removed from favorites'})
+
+# Reading Statistics API Endpoints
+@app.route('/api/user/reading-stats', methods=['GET'])
+def get_reading_stats():
+    """Get user's reading statistics"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT quran_verses_read, hadiths_read, daily_reading_streak, 
+               total_reading_days, last_reading_date, favorite_reciter
+        FROM user_reading_stats WHERE user_id = ?
+    ''', (session['user_id'],))
+    
+    result = cursor.fetchone()
+    conn.close()
+    
+    if result:
+        stats = {
+            'quran_verses_read': result[0],
+            'hadiths_read': result[1],
+            'daily_reading_streak': result[2],
+            'total_reading_days': result[3],
+            'last_reading_date': result[4],
+            'favorite_reciter': result[5]
+        }
+    else:
+        # Create default stats
+        stats = {
+            'quran_verses_read': 0,
+            'hadiths_read': 0,
+            'daily_reading_streak': 0,
+            'total_reading_days': 0,
+            'last_reading_date': None,
+            'favorite_reciter': 'ar.alafasy'
+        }
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO user_reading_stats 
+            (user_id, quran_verses_read, hadiths_read, daily_reading_streak, total_reading_days, favorite_reciter)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (session['user_id'], 0, 0, 0, 0, 'ar.alafasy'))
+        conn.commit()
+        conn.close()
+    
+    return jsonify(stats)
+
+@app.route('/api/user/reading-stats', methods=['POST'])
+def update_reading_stats():
+    """Update user's reading statistics"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if stats exist
+    cursor.execute('SELECT id FROM user_reading_stats WHERE user_id = ?', (session['user_id'],))
+    exists = cursor.fetchone()
+    
+    if exists:
+        # Update existing stats
+        update_fields = []
+        values = []
+        
+        if 'quran_verses_read' in data:
+            update_fields.append('quran_verses_read = quran_verses_read + ?')
+            values.append(data['quran_verses_read'])
+        
+        if 'hadiths_read' in data:
+            update_fields.append('hadiths_read = hadiths_read + ?')
+            values.append(data['hadiths_read'])
+        
+        if 'daily_reading_streak' in data:
+            update_fields.append('daily_reading_streak = ?')
+            values.append(data['daily_reading_streak'])
+        
+        if 'favorite_reciter' in data:
+            update_fields.append('favorite_reciter = ?')
+            values.append(data['favorite_reciter'])
+        
+        if update_fields:
+            update_fields.append('last_reading_date = CURRENT_DATE')
+            values.append(session['user_id'])
+            
+            cursor.execute(f'''
+                UPDATE user_reading_stats 
+                SET {', '.join(update_fields)}
+                WHERE user_id = ?
+            ''', values)
+    else:
+        # Create new stats
+        cursor.execute('''
+            INSERT INTO user_reading_stats 
+            (user_id, quran_verses_read, hadiths_read, daily_reading_streak, total_reading_days, last_reading_date, favorite_reciter)
+            VALUES (?, ?, ?, ?, 1, CURRENT_DATE, ?)
+        ''', (
+            session['user_id'],
+            data.get('quran_verses_read', 0),
+            data.get('hadiths_read', 0),
+            data.get('daily_reading_streak', 1),
+            data.get('favorite_reciter', 'ar.alafasy')
+        ))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Reading statistics updated'})
+
+# User Achievements API Endpoints
+@app.route('/api/user/achievements', methods=['GET'])
+def get_user_achievements():
+    """Get user's achievements"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT achievement_type, achievement_name, achievement_data, earned_at
+        FROM user_achievements WHERE user_id = ?
+        ORDER BY earned_at DESC
+    ''', (session['user_id'],))
+    
+    achievements = []
+    for row in cursor.fetchall():
+        achievements.append({
+            'type': row[0],
+            'name': row[1],
+            'data': json.loads(row[2]) if row[2] else {},
+            'earned_at': row[3]
+        })
+    
+    conn.close()
+    return jsonify(achievements)
+
+@app.route('/api/user/achievements', methods=['POST'])
+def add_user_achievement():
+    """Add a new achievement for the user"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.get_json()
+    if not data or 'type' not in data or 'name' not in data:
+        return jsonify({'error': 'Achievement type and name required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        INSERT INTO user_achievements (user_id, achievement_type, achievement_name, achievement_data)
+        VALUES (?, ?, ?, ?)
+    ''', (
+        session['user_id'],
+        data['type'],
+        data['name'],
+        json.dumps(data.get('data', {}))
+    ))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True, 'message': 'Achievement added successfully'})
+
+# User Dashboard Route
+@app.route('/dashboard')
+def user_dashboard():
+    """User dashboard for managing personal data and preferences"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('user_dashboard.html', 
+                         username=session.get('username'))
 
 if __name__ == '__main__':
     init_db()
