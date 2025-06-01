@@ -68,8 +68,8 @@ kubectl apply -f ingress.yaml
 
 # Step 8: Apply network policy (only if NetworkPolicy is supported)
 echo "🛡️ Applying network policy..."
-if kubectl api-resources | grep -q "networkpolicies"; then
-    kubectl apply -f network-policy.yaml
+if kubectl api-resources | grep -q "networkpolicies.*networking.k8s.io"; then
+    kubectl apply -f network-policy.yaml || echo "⚠️  Failed to apply network policy, continuing..."
     echo "✅ Network policy applied"
 else
     echo "⚠️  NetworkPolicy not supported in this cluster, skipping..."
@@ -77,8 +77,8 @@ fi
 
 # Step 9: Apply monitoring (only if Prometheus operator is installed)
 echo "📈 Applying monitoring..."
-if kubectl api-resources | grep -q "servicemonitors"; then
-    kubectl apply -f monitoring.yaml
+if kubectl api-resources | grep -q "servicemonitors.*monitoring.coreos.com"; then
+    kubectl apply -f monitoring.yaml || echo "⚠️  Failed to apply monitoring, continuing..."
     echo "✅ Monitoring applied"
 else
     echo "⚠️  Prometheus operator not installed, skipping monitoring setup..."
@@ -94,7 +94,7 @@ echo "🐳 Docker Image: $DOCKER_IMAGE"
 echo "📦 Namespace: $NAMESPACE"
 echo ""
 echo "📋 Access your application:"
-echo "   NodePort: http://<node-ip>:30000"
+echo "   NodePort: http://<node-ip>:30001"
 echo "   Port Forward: kubectl port-forward -n $NAMESPACE service/islamic-app-service 5000:5000"
 echo ""
 echo "🔍 Check deployment status:"
