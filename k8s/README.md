@@ -43,6 +43,7 @@ This directory contains the Kubernetes manifests needed to deploy the Islamic Fl
 ## Accessing the Application:
 
 - **Internal access:** `http://islamic-app-service.islamic-app:5000`
+- **External access (NodePort):** `http://<node-ip>:30000` - Service is exposed as NodePort on port 30000
 - **External access (with ingress):** Configure your ingress controller and access via the configured domain
 - **Port forwarding for testing:** `kubectl port-forward -n islamic-app service/islamic-app-service 5000:5000`
 
