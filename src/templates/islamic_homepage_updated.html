@@ -1,0 +1,1165 @@
+{% extends "base.html" %}
+
+{% block title %}التطبيق الإسلامي الشامل - Islamic Dashboard{% endblock %}
+
+{% block styles %}
+<!-- Google Fonts - Islamic Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        /* Base Islamic Color Palette */
+        --islamic-gold: #D4AF37;
+        --islamic-gold-light: #F5E6A3;
+        --islamic-gold-dark: #B8941F;
+        --islamic-green: #2C5F2D;
+        --islamic-green-light: #4A7C59;
+        --islamic-green-dark: #1E4B2A;
+        --islamic-blue: #1B4F72;
+        --islamic-blue-light: #2E86AB;
+    }
+
+    /* Light Theme Islamic Colors */
+    [data-theme="light"] {
+        --islamic-cream: #F7F3E9;
+        --islamic-white: #FAFAFA;
+        --islamic-card-bg: #FFFFFF;
+        --text-primary: #2C3E50;
+        --text-secondary: #34495E;
+        --text-muted: #7F8C8D;
+        --islamic-greeting-text: #2C5F2D;
+        --islamic-greeting-bg: #FFFFFF;
+        --islamic-card-text: #2C3E50;
+        --islamic-banner-text: #FFFFFF;
+        --prayer-text: #2C5F2D;
+        --weather-temp-color: #1B4F72;
+        --verse-text-color: #2C5F2D;
+        --counter-display-color: #D4AF37;
+        --stat-number-color: #1B4F72;
+        --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+        --shadow-heavy: 0 15px 35px rgba(0, 0, 0, 0.2);
+        --islamic-bg-gradient: linear-gradient(135deg, var(--islamic-cream) 0%, var(--islamic-white) 100%);
+        --islamic-pattern-opacity: 0.05;
+        --islamic-banner-overlay: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Dark Theme Islamic Colors */
+    [data-theme="dark"] {
+        --islamic-cream: #2A3F47;
+        --islamic-white: #1A2832;
+        --islamic-card-bg: #243742;
+        --text-primary: #E8F4F8;
+        --text-secondary: #B8CDD9;
+        --text-muted: #8FA5B3;
+        --islamic-greeting-text: #7dd3fc;
+        --islamic-greeting-bg: #243742;
+        --islamic-card-text: #E8F4F8;
+        --islamic-banner-text: #FFFFFF;
+        --prayer-text: #7dd3fc;
+        --weather-temp-color: #60a5fa;
+        --verse-text-color: #7dd3fc;
+        --counter-display-color: #fbbf24;
+        --stat-number-color: #60a5fa;
+        --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.3);
+        --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.4);
+        --shadow-heavy: 0 15px 35px rgba(0, 0, 0, 0.5);
+        --islamic-bg-gradient: linear-gradient(135deg, #1A2832 0%, #243742 100%);
+        --islamic-pattern-opacity: 0.08;
+        --islamic-banner-overlay: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Default dark theme */
+    body {
+        --islamic-cream: #2A3F47;
+        --islamic-white: #1A2832;
+        --islamic-card-bg: #243742;
+        --text-primary: #E8F4F8;
+        --text-secondary: #B8CDD9;
+        --text-muted: #8FA5B3;
+        --islamic-greeting-text: #7dd3fc;
+        --islamic-greeting-bg: #243742;
+        --islamic-card-text: #E8F4F8;
+        --islamic-banner-text: #FFFFFF;
+        --prayer-text: #7dd3fc;
+        --weather-temp-color: #60a5fa;
+        --verse-text-color: #7dd3fc;
+        --counter-display-color: #fbbf24;
+        --stat-number-color: #60a5fa;
+        --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.3);
+        --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.4);
+        --shadow-heavy: 0 15px 35px rgba(0, 0, 0, 0.5);
+        --islamic-bg-gradient: linear-gradient(135deg, #1A2832 0%, #243742 100%);
+        --islamic-pattern-opacity: 0.08;
+        --islamic-banner-overlay: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Override body styles for Islamic theme */
+    body {
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        background: var(--islamic-bg-gradient) !important;
+        color: var(--text-primary) !important;
+        line-height: 1.6;
+        overflow-x: hidden;
+        transition: all 0.3s ease !important;
+    }
+
+    /* Animated Islamic Pattern Background */
+    .islamic-pattern-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: var(--islamic-pattern-opacity);
+        background-image: 
+            radial-gradient(circle at 20% 20%, var(--islamic-gold) 2px, transparent 2px),
+            radial-gradient(circle at 80% 80%, var(--islamic-green) 1px, transparent 1px),
+            radial-gradient(circle at 40% 60%, var(--islamic-blue) 1.5px, transparent 1.5px);
+        background-size: 80px 80px, 120px 120px, 60px 60px;
+        animation: patternDrift 30s linear infinite;
+    }
+
+    .islamic-pattern-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(212, 175, 55, 0.02) 10px,
+                rgba(212, 175, 55, 0.02) 20px
+            );
+        animation: patternSlide 25s linear infinite reverse;
+    }
+
+    @keyframes patternDrift {
+        0% { transform: translateX(0) translateY(0); }
+        33% { transform: translateX(30px) translateY(-30px); }
+        66% { transform: translateX(-20px) translateY(20px); }
+        100% { transform: translateX(0) translateY(0); }
+    }
+
+    @keyframes patternSlide {
+        0% { transform: translateX(0) translateY(0); }
+        100% { transform: translateX(40px) translateY(40px); }
+    }
+
+    /* Container Override for Better Layout */
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+    }
+
+    /* Welcome Banner */
+    .welcome-banner {
+        background: linear-gradient(135deg, var(--islamic-gold) 0%, var(--islamic-gold-dark) 100%);
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .welcome-banner::before {
+        content: "﷽";
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        font-size: 8rem;
+        color: var(--islamic-banner-overlay);
+        font-family: 'Amiri', serif;
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .welcome-title {
+        font-family: 'Amiri', serif;
+        font-size: 3rem;
+        color: var(--islamic-banner-text);
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.3rem;
+        color: var(--islamic-banner-text);
+        opacity: 0.9;
+        margin-bottom: 1rem;
+        animation: fadeInUp 1s ease-out 0.2s both;
+    }
+
+    .current-time {
+        font-size: 1.1rem;
+        color: var(--islamic-banner-text);
+        opacity: 0.8;
+        animation: fadeInUp 1s ease-out 0.4s both;
+    }
+
+    /* Islamic Greeting */
+    .islamic-greeting {
+        background: var(--islamic-card-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-medium);
+        animation: fadeInUp 1s ease-out 0.6s both;
+        transition: all 0.3s ease;
+    }
+
+    .greeting-text {
+        font-family: 'Amiri', serif;
+        font-size: 2rem;
+        color: var(--islamic-greeting-text);
+        margin-bottom: 0.5rem;
+    }
+
+    .greeting-translation {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Islamic Card Styles */
+    .islamic-card {
+        background: var(--islamic-card-bg);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-medium);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .islamic-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--islamic-gold) 0%, var(--islamic-green) 100%);
+    }
+
+    .islamic-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        padding-bottom: 1rem;
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        margin-left: 1rem;
+        color: var(--islamic-gold);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .card-title {
+        font-family: 'Amiri', serif;
+        font-size: 1.5rem;
+        color: var(--islamic-greeting-text);
+        font-weight: 700;
+    }
+
+    /* Prayer Times Card */
+    .prayer-times-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .prayer-item {
+        background: var(--islamic-cream);
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .prayer-item.next-prayer {
+        background: linear-gradient(135deg, var(--islamic-gold) 0%, var(--islamic-gold-light) 100%);
+        color: var(--islamic-white);
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+        from { box-shadow: 0 0 10px var(--islamic-gold); }
+        to { box-shadow: 0 0 20px var(--islamic-gold-dark); }
+    }
+
+    .prayer-name {
+        font-family: 'Amiri', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .prayer-time {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--prayer-text);
+    }
+
+    .prayer-item.next-prayer .prayer-time {
+        color: var(--islamic-white);
+    }
+
+    /* Weather Card */
+    .weather-display {
+        text-align: center;
+    }
+
+    .weather-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .weather-temp {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--weather-temp-color);
+    }
+
+    .weather-icon {
+        font-size: 3rem;
+        color: var(--islamic-gold);
+        animation: weatherFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes weatherFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .weather-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .weather-detail {
+        background: var(--islamic-cream);
+        padding: 0.8rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .weather-detail-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.3rem;
+    }
+
+    .weather-detail-value {
+        font-weight: 700;
+        color: var(--prayer-text);
+    }
+
+    /* Daily Verse Card */
+    .verse-container {
+        text-align: center;
+    }
+
+    .verse-arabic {
+        font-family: 'Amiri', serif;
+        font-size: 1.4rem;
+        color: var(--verse-text-color);
+        line-height: 2;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--islamic-cream);
+        border-radius: 10px;
+        border-right: 4px solid var(--islamic-gold);
+    }
+
+    .verse-translation {
+        font-style: italic;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .verse-reference {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    /* Dhikr Counter Card */
+    .dhikr-counter {
+        text-align: center;
+    }
+
+    .counter-display {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--counter-display-color);
+        margin: 1rem 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .counter-phrase {
+        font-family: 'Amiri', serif;
+        font-size: 1.3rem;
+        color: var(--verse-text-color);
+        margin-bottom: 1rem;
+    }
+
+    .counter-button {
+        background: linear-gradient(135deg, var(--islamic-green) 0%, var(--islamic-green-dark) 100%);
+        color: var(--islamic-white);
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+    .counter-button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .counter-button:active {
+        transform: scale(0.95);
+    }
+
+    /* User Stats Card */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        background: var(--islamic-cream);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--stat-number-color);
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        background: var(--islamic-card-bg);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-medium);
+        margin-top: 2rem;
+        animation: fadeInUp 1s ease-out 0.8s both;
+        transition: all 0.3s ease;
+    }
+
+    .actions-title {
+        font-family: 'Amiri', serif;
+        font-size: 1.8rem;
+        color: var(--islamic-greeting-text);
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-button {
+        background: linear-gradient(135deg, var(--islamic-blue) 0%, var(--islamic-blue-light) 100%);
+        color: var(--islamic-white);
+        border: none;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+        cursor: pointer;
+    }
+
+    .action-button:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-medium);
+        color: var(--islamic-white);
+        text-decoration: none;
+    }
+
+    .action-icon {
+        font-size: 2rem;
+    }
+
+    .action-text {
+        font-weight: 600;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Loading states */
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(212, 175, 55, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--islamic-gold);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Notification styles */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+    }
+
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .notification.success {
+        background: linear-gradient(135deg, var(--islamic-green) 0%, var(--islamic-green-dark) 100%);
+    }
+
+    .notification.error {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .welcome-banner {
+            padding: 2rem 1rem;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .prayer-times-container {
+            grid-template-columns: 1fr;
+        }
+
+        .weather-main {
+            flex-direction: column;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .welcome-title {
+            font-size: 1.5rem;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .counter-display {
+            font-size: 3rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Animated Islamic Pattern Background -->
+<div class="islamic-pattern-bg"></div>
+
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <h1 class="welcome-title">مرحباً بك في التطبيق الإسلامي الشامل</h1>
+    <p class="welcome-subtitle">{{ 'أهلاً وسهلاً بك ' + username if username else 'أهلاً وسهلاً بك' }}</p>
+    <div class="current-time" id="currentTime">جارٍ تحديد الوقت الحالي...</div>
+</div>
+
+<!-- Islamic Greeting -->
+<div class="islamic-greeting">
+    <div class="greeting-text">السلام عليكم ورحمة الله وبركاته</div>
+    <div class="greeting-translation">Peace be upon you and God's mercy and blessings</div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Prayer Times Card -->
+    <div class="islamic-card">
+        <div class="card-header">
+            <i class="fas fa-mosque card-icon"></i>
+            <h3 class="card-title">أوقات الصلاة</h3>
+        </div>
+        <div class="prayer-times-container" id="prayerTimesContainer">
+            <div class="loading"></div>
+        </div>
+    </div>
+
+    <!-- Weather Card -->
+    <div class="islamic-card">
+        <div class="card-header">
+            <i class="fas fa-cloud-sun card-icon"></i>
+            <h3 class="card-title">حالة الطقس</h3>
+        </div>
+        <div class="weather-display">
+            <div class="weather-main">
+                <div class="weather-temp" id="weatherTemp">25°</div>
+                <i class="fas fa-sun weather-icon" id="weatherIcon"></i>
+            </div>
+            <div id="weatherDesc">طقس معتدل</div>
+            <div class="weather-details">
+                <div class="weather-detail">
+                    <div class="weather-detail-label">الرطوبة</div>
+                    <div class="weather-detail-value" id="humidity">60%</div>
+                </div>
+                <div class="weather-detail">
+                    <div class="weather-detail-label">سرعة الرياح</div>
+                    <div class="weather-detail-value" id="windSpeed">15 كم/س</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Verse Card -->
+    <div class="islamic-card">
+        <div class="card-header">
+            <i class="fas fa-quran card-icon"></i>
+            <h3 class="card-title">آية اليوم</h3>
+        </div>
+        <div class="verse-container">
+            <div class="verse-arabic" id="verseArabic">جارٍ تحميل الآية...</div>
+            <div class="verse-translation" id="verseTranslation"></div>
+            <div class="verse-reference" id="verseReference"></div>
+        </div>
+    </div>
+
+    <!-- Dhikr Counter Card -->
+    <div class="islamic-card">
+        <div class="card-header">
+            <i class="fas fa-prayer-hands card-icon"></i>
+            <h3 class="card-title">عداد التسبيح</h3>
+        </div>
+        <div class="dhikr-counter">
+            <div class="counter-display" id="dhikrCount">0</div>
+            <div class="counter-phrase">سبحان الله</div>
+            <button class="counter-button" onclick="incrementDhikr()">
+                <i class="fas fa-plus"></i> تسبيح
+            </button>
+        </div>
+    </div>
+
+    <!-- User Stats Card -->
+    <div class="islamic-card">
+        <div class="card-header">
+            <i class="fas fa-chart-line card-icon"></i>
+            <h3 class="card-title">إحصائياتي</h3>
+        </div>
+        <div class="stats-grid" id="userStatsContainer">
+            <div class="stat-item">
+                <div class="stat-number" id="totalDhikr">0</div>
+                <div class="stat-label">إجمالي التسبيحات</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalPhrases">3</div>
+                <div class="stat-label">عدد العبارات</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="memberDays">1</div>
+                <div class="stat-label">أيام العضوية</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="dailyGoal">100</div>
+                <div class="stat-label">الهدف اليومي</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Hadith Card -->
+    <div class="islamic-card">
+        <div class="card-header">
+            <i class="fas fa-book-open card-icon"></i>
+            <h3 class="card-title">حديث اليوم</h3>
+        </div>
+        <div class="verse-container">
+            {% if random_hadith %}
+            <div class="verse-arabic">{{ random_hadith.arabic }}</div>
+            <div class="verse-translation">{{ random_hadith.translation }}</div>
+            <div class="verse-reference">{{ random_hadith.narrator }}</div>
+            {% else %}
+            <div class="verse-arabic">اللهم صل وسلم على نبينا محمد</div>
+            <div class="verse-translation">O Allah, send prayers and peace upon our Prophet Muhammad</div>
+            <div class="verse-reference">دعاء مبارك</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h3 class="actions-title">الإجراءات السريعة</h3>
+    <div class="actions-grid">
+        <a href="{{ url_for('tasbeh') }}" class="action-button">
+            <i class="fas fa-prayer-hands action-icon"></i>
+            <span class="action-text">التسبيح المتقدم</span>
+        </a>
+        <a href="{{ url_for('prayer_times') }}" class="action-button">
+            <i class="fas fa-mosque action-icon"></i>
+            <span class="action-text">أوقات الصلاة</span>
+        </a>
+        <a href="{{ url_for('quran') }}" class="action-button">
+            <i class="fas fa-quran action-icon"></i>
+            <span class="action-text">القرآن الكريم</span>
+        </a>
+        <a href="{{ url_for('hadith') }}" class="action-button">
+            <i class="fas fa-book-open action-icon"></i>
+            <span class="action-text">الأحاديث النبوية</span>
+        </a>
+        {% if username %}
+        <a href="{{ url_for('my_phrases') }}" class="action-button">
+            <i class="fas fa-heart action-icon"></i>
+            <span class="action-text">عباراتي المفضلة</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('signup') }}" class="action-button">
+            <i class="fas fa-user-plus action-icon"></i>
+            <span class="action-text">إنشاء حساب</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Notification container -->
+<div id="notification" class="notification"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Global variables
+    let dhikrCount = 0;
+    let currentQuotes = [];
+    let currentQuoteIndex = 0;
+
+    // Initialize page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCurrentTime();
+        loadPrayerTimes();
+        loadWeatherData();
+        loadDailyVerse();
+        loadUserStats();
+        loadDhikrCount();
+        
+        // Update time every minute
+        setInterval(updateCurrentTime, 60000);
+        
+        // Rotate quotes every 10 seconds
+        setInterval(rotateQuotes, 10000);
+    });
+
+    // Time and Date Functions
+    function updateCurrentTime() {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        const timeString = now.toLocaleDateString('ar-SA', options);
+        document.getElementById('currentTime').textContent = timeString;
+    }
+
+    // Prayer Times Functions
+    function loadPrayerTimes() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    fetchPrayerTimes(lat, lng);
+                },
+                function(error) {
+                    console.log('Geolocation denied or failed:', error);
+                    // Fallback to Mecca coordinates
+                    fetchPrayerTimes(21.4225, 39.8262);
+                }
+            );
+        } else {
+            // Browser doesn't support geolocation, use Mecca as default
+            fetchPrayerTimes(21.4225, 39.8262);
+        }
+    }
+
+    function fetchPrayerTimes(lat, lng) {
+        fetch(`/api/prayer-times?lat=${lat}&lng=${lng}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updatePrayerTimesDisplay(data.data);
+            } else {
+                showDefaultPrayerTimes();
+            }
+        })
+        .catch(error => {
+            console.log('Prayer times unavailable:', error);
+            showDefaultPrayerTimes();
+        });
+    }
+
+    function updatePrayerTimesDisplay(prayerData) {
+        const container = document.getElementById('prayerTimesContainer');
+        const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        const prayerNames = {
+            'Fajr': 'الفجر',
+            'Dhuhr': 'الظهر', 
+            'Asr': 'العصر',
+            'Maghrib': 'المغرب',
+            'Isha': 'العشاء'
+        };
+
+        let html = '';
+        const now = new Date();
+        let nextPrayer = null;
+
+        prayers.forEach(prayer => {
+            const time = prayerData.timings[prayer];
+            if (time && time !== 'Invalid time') {
+                const prayerTime = new Date(`${now.toDateString()} ${time}`);
+                const isNext = !nextPrayer && prayerTime > now;
+                if (isNext) nextPrayer = prayer;
+
+                html += `
+                    <div class="prayer-item ${isNext ? 'next-prayer' : ''}">
+                        <div class="prayer-name">${prayerNames[prayer]}</div>
+                        <div class="prayer-time">${time}</div>
+                    </div>
+                `;
+            }
+        });
+
+        if (html) {
+            container.innerHTML = html;
+        } else {
+            showDefaultPrayerTimes();
+        }
+    }
+
+    function showDefaultPrayerTimes() {
+        const container = document.getElementById('prayerTimesContainer');
+        container.innerHTML = `
+            <div class="prayer-item">
+                <div class="prayer-name">الفجر</div>
+                <div class="prayer-time">05:30</div>
+            </div>
+            <div class="prayer-item">
+                <div class="prayer-name">الظهر</div>
+                <div class="prayer-time">12:15</div>
+            </div>
+            <div class="prayer-item next-prayer">
+                <div class="prayer-name">العصر</div>
+                <div class="prayer-time">15:45</div>
+            </div>
+            <div class="prayer-item">
+                <div class="prayer-name">المغرب</div>
+                <div class="prayer-time">18:30</div>
+            </div>
+            <div class="prayer-item">
+                <div class="prayer-name">العشاء</div>
+                <div class="prayer-time">20:00</div>
+            </div>
+        `;
+    }
+
+    // Weather Functions
+    function loadWeatherData() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    fetchWeatherData(lat, lng);
+                },
+                function(error) {
+                    console.log('Geolocation denied or failed:', error);
+                    // Fallback to Mecca coordinates
+                    fetchWeatherData(21.4225, 39.8262);
+                }
+            );
+        } else {
+            // Browser doesn't support geolocation, use Mecca as default
+            fetchWeatherData(21.4225, 39.8262);
+        }
+    }
+
+    function fetchWeatherData(lat, lng) {
+        fetch(`/api/weather?lat=${lat}&lng=${lng}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateWeatherDisplay(data.data);
+            } else {
+                showDefaultWeather();
+            }
+        })
+        .catch(error => {
+            console.log('Weather data unavailable:', error);
+            showDefaultWeather();
+        });
+    }
+
+    function updateWeatherDisplay(weather) {
+        document.getElementById('weatherTemp').textContent = `${Math.round(weather.temperature)}°`;
+        document.getElementById('weatherDesc').textContent = weather.description;
+        document.getElementById('humidity').textContent = `${weather.humidity}%`;
+        document.getElementById('windSpeed').textContent = `${Math.round(weather.wind.speed)} كم/س`;
+        
+        // Update weather icon - use Font Awesome instead of emoji
+        const iconElement = document.getElementById('weatherIcon');
+        iconElement.className = `fas ${getWeatherIconFA(weather.condition)} weather-icon`;
+    }
+
+    function showDefaultWeather() {
+        document.getElementById('weatherTemp').textContent = '25°';
+        document.getElementById('weatherDesc').textContent = 'طقس معتدل';
+        document.getElementById('humidity').textContent = '60%';
+        document.getElementById('windSpeed').textContent = '15 كم/س';
+    }
+
+    function getWeatherIconFA(condition) {
+        const iconMap = {
+            'clear': 'fa-sun',
+            'few_clouds': 'fa-cloud-sun',
+            'scattered_clouds': 'fa-cloud',
+            'broken_clouds': 'fa-clouds',
+            'light_rain': 'fa-cloud-rain',
+            'rain': 'fa-cloud-rain',
+            'thunderstorm': 'fa-bolt',
+            'snow': 'fa-snowflake',
+            'mist': 'fa-smog',
+            'haze': 'fa-smog',
+            'dust': 'fa-wind'
+        };
+        return iconMap[condition] || 'fa-sun';
+    }
+
+    // Daily Verse Functions
+    function loadDailyVerse() {
+        fetch('/api/daily-verse')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateVerseDisplay(data.verse);
+            } else {
+                showDefaultVerse();
+            }
+        })
+        .catch(error => {
+            console.log('Daily verse unavailable:', error);
+            showDefaultVerse();
+        });
+    }
+
+    function updateVerseDisplay(verse) {
+        document.getElementById('verseArabic').textContent = verse.arabic;
+        document.getElementById('verseTranslation').textContent = verse.translation;
+        document.getElementById('verseReference').textContent = verse.reference || '';
+    }
+
+    function showDefaultVerse() {
+        document.getElementById('verseArabic').textContent = 'وَاذْكُرُوا اللَّهَ كَثِيرًا لَّعَلَّكُمْ تُفْلِحُونَ';
+        document.getElementById('verseTranslation').textContent = 'Remember Allah much, so that you may be successful';
+        document.getElementById('verseReference').textContent = 'سورة الجمعة - آية 10';
+    }
+
+    // Dhikr Counter Functions
+    function loadDhikrCount() {
+        // Load from localStorage first
+        const savedCount = localStorage.getItem('dhikrCount');
+        if (savedCount) {
+            dhikrCount = parseInt(savedCount);
+            document.getElementById('dhikrCount').textContent = dhikrCount;
+        }
+    }
+
+    function incrementDhikr() {
+        dhikrCount++;
+        document.getElementById('dhikrCount').textContent = dhikrCount;
+        localStorage.setItem('dhikrCount', dhikrCount);
+        
+        // Add animation effect
+        const counter = document.getElementById('dhikrCount');
+        counter.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            counter.style.transform = 'scale(1)';
+        }, 200);
+
+        // Try to sync with server if user is logged in
+        {% if username %}
+        fetch('/increment-dhikr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                phrase: 'سبحان الله',
+                count: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Dhikr synced with server');
+            }
+        })
+        .catch(error => {
+            console.log('Could not sync dhikr with server:', error);
+        });
+        {% endif %}
+    }
+
+    // User Stats Functions
+    function loadUserStats() {
+        {% if username %}
+        fetch('/api/user-stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateUserStatsDisplay(data.stats);
+            } else {
+                showDefaultStats();
+            }
+        })
+        .catch(error => {
+            console.log('User stats unavailable:', error);
+            showDefaultStats();
+        });
+        {% else %}
+        showDefaultStats();
+        {% endif %}
+    }
+
+    function updateUserStatsDisplay(stats) {
+        document.getElementById('totalDhikr').textContent = stats.total_dhikr || 0;
+        document.getElementById('totalPhrases').textContent = stats.total_phrases || 3;
+        document.getElementById('memberDays').textContent = stats.member_days || 1;
+        document.getElementById('dailyGoal').textContent = '100';
+    }
+
+    function showDefaultStats() {
+        const localCount = localStorage.getItem('dhikrCount') || 0;
+        document.getElementById('totalDhikr').textContent = localCount;
+        document.getElementById('totalPhrases').textContent = '3';
+        document.getElementById('memberDays').textContent = '1';
+        document.getElementById('dailyGoal').textContent = '100';
+    }
+
+    // Quote Rotation Functions
+    function rotateQuotes() {
+        // This can be implemented to rotate inspirational quotes
+        console.log('Rotating quotes...');
+    }
+
+    // Notification Functions
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+</script>
+{% endblock %}

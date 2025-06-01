@@ -10,9 +10,33 @@ import json
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
-# Register API blueprint
-from routes import api_bp
-app.register_blueprint(api_bp, url_prefix='/api')
+# Register API routes directly in app
+from routes.api import get_prayer_times as api_get_prayer_times, get_weather as api_get_weather, get_islamic_cities, get_islamic_date, geocode_location
+
+# Import and register Islamic content blueprint
+from routes.islamic_content import bp as islamic_content_bp
+app.register_blueprint(islamic_content_bp, url_prefix='/api/quran')
+
+# Register API routes
+@app.route('/api/prayer-times')
+def api_prayer_times():
+    return api_get_prayer_times()
+
+@app.route('/api/weather')
+def api_weather():
+    return api_get_weather()
+
+@app.route('/api/cities')
+def api_cities():
+    return get_islamic_cities()
+
+@app.route('/api/islamic-date')
+def api_islamic_date():
+    return get_islamic_date()
+
+@app.route('/api/geocode')
+def api_geocode():
+    return geocode_location()
 
 # Database initialization
 def init_db():
@@ -193,10 +217,13 @@ def home():
         username = None
     
     random_phrase = random.choice(phrases)
-    return render_template('index.html', 
+    # Use the updated Islamic homepage with proper base template integration
+    return render_template('islamic_homepage_updated.html', 
                          phrase=random_phrase, 
                          username=username,
-                         random_hadith=random_hadith)
+                         random_hadith=random_hadith,
+                         quran_verses=quran_verses,
+                         islamic_phrases=islamic_phrases)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -1101,6 +1128,44 @@ def inject_theme_settings():
     
 # Enable debugging
 app.debug = True
+
+# API endpoints for Islamic homepage
+@app.route('/api/daily-verse')
+def api_daily_verse():
+    """Get a random daily verse from Quran"""
+    daily_verse = random.choice(quran_verses)
+    return jsonify(daily_verse)
+
+@app.route('/api/user-stats')
+def api_user_stats():
+    """Get user statistics"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get total dhikr count
+    cursor.execute('SELECT SUM(count) FROM tasbeh_counts WHERE user_id = ?', 
+                   (session['user_id'],))
+    total_dhikr = cursor.fetchone()[0] or 0
+    
+    # Get total phrases added
+    cursor.execute('SELECT COUNT(*) FROM user_phrases WHERE user_id = ?', 
+                   (session['user_id'],))
+    total_phrases = cursor.fetchone()[0] or 0
+    
+    # Get days since registration (placeholder)
+    days_since_registration = 30  # This could be calculated from actual registration date
+    
+    conn.close()
+    
+    return jsonify({
+        'total_dhikr': total_dhikr,
+        'total_phrases': total_phrases,
+        'days_since_registration': days_since_registration,
+        'username': session.get('username', 'مستخدم')
+    })
 
 if __name__ == '__main__':
     init_db()

@@ -1,0 +1,787 @@
+{% extends "base.html" %}
+
+{% block title %}اختبار الأصوات والإشعارات{% endblock %}
+
+{% block styles %}
+<style>
+    .test-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .test-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .test-header h1 {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .test-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .test-section {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .test-button {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-bottom: 0.8rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .test-button:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .test-button:active {
+        transform: translateY(0);
+    }
+
+    .test-button.success {
+        background: var(--success-color);
+    }
+
+    .test-button.warning {
+        background: var(--warning-color);
+    }
+
+    .test-button.danger {
+        background: var(--error-color);
+    }
+
+    .status-display {
+        background: var(--bg-color);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .status-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-label {
+        font-weight: 500;
+    }
+
+    .status-value {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .status-enabled {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .status-disabled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .status-unknown {
+        background: rgba(156, 163, 175, 0.1);
+        color: #9ca3af;
+    }
+
+    .control-panel {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-group {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--bg-color);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .volume-slider {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border-color);
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .test-log {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 1rem;
+        font-family: monospace;
+        font-size: 0.9rem;
+        direction: ltr;
+        text-align: left;
+    }
+
+    .log-entry {
+        padding: 0.25rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .log-entry:last-child {
+        border-bottom: none;
+    }
+
+    .log-time {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .emergency-controls {
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+    .emergency-controls h3 {
+        color: #dc2626;
+        margin-bottom: 1rem;
+    }
+
+    .emergency-button {
+        background: #dc2626;
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .test-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .control-group {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <div class="test-header">
+        <h1>🎵 اختبار الأصوات والإشعارات</h1>
+        <p>اختبار شامل لجميع أصوات التطبيق الإسلامي</p>
+    </div>
+
+    <!-- حالة النظام -->
+    <div class="control-panel">
+        <h2 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            حالة النظام
+        </h2>
+        <div class="status-display">
+            <div class="status-item">
+                <span class="status-label">دعم الإشعارات:</span>
+                <span class="status-value" id="notificationSupport">جاري التحقق...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">إذن الإشعارات:</span>
+                <span class="status-value" id="notificationPermission">جاري التحقق...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">دعم الصوت:</span>
+                <span class="status-value" id="audioSupport">جاري التحقق...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">دعم الاهتزاز:</span>
+                <span class="status-value" id="vibrationSupport">جاري التحقق...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">مدير الصوت:</span>
+                <span class="status-value" id="audioManagerStatus">جاري التحقق...</span>
+            </div>
+        </div>
+
+        <!-- تحكم في مستوى الصوت -->
+        <div class="volume-control">
+            <i class="fas fa-volume-down"></i>
+            <input type="range" class="volume-slider" id="testVolumeSlider" min="0" max="100" value="70">
+            <i class="fas fa-volume-up"></i>
+            <span id="volumeDisplay">70%</span>
+        </div>
+    </div>
+
+    <!-- اختبارات الأصوات -->
+    <div class="test-grid">
+        <!-- أصوات الصلاة -->
+        <div class="test-section">
+            <h2 class="section-title">
+                <i class="fas fa-mosque"></i>
+                أصوات الصلاة
+            </h2>
+            <button class="test-button" onclick="testPrayerSound('fajr')">
+                <i class="fas fa-sun"></i>
+                اختبار أذان الفجر
+            </button>
+            <button class="test-button" onclick="testPrayerSound('dhuhr')">
+                <i class="fas fa-mosque"></i>
+                اختبار أذان الظهر
+            </button>
+            <button class="test-button" onclick="testPrayerSound('asr')">
+                <i class="fas fa-cloud-sun"></i>
+                اختبار أذان العصر
+            </button>
+            <button class="test-button" onclick="testPrayerSound('maghrib')">
+                <i class="fas fa-sunset"></i>
+                اختبار أذان المغرب
+            </button>
+            <button class="test-button" onclick="testPrayerSound('isha')">
+                <i class="fas fa-moon"></i>
+                اختبار أذان العشاء
+            </button>
+        </div>
+
+        <!-- أصوات الأذكار -->
+        <div class="test-section">
+            <h2 class="section-title">
+                <i class="fas fa-hands-praying"></i>
+                أصوات الأذكار
+            </h2>
+            <button class="test-button" onclick="testAzkarSound('morning')">
+                <i class="fas fa-sunrise"></i>
+                أذكار الصباح
+            </button>
+            <button class="test-button" onclick="testAzkarSound('evening')">
+                <i class="fas fa-mountain-sun"></i>
+                أذكار المساء
+            </button>
+            <button class="test-button" onclick="testAzkarSound('sleep')">
+                <i class="fas fa-bed"></i>
+                أذكار النوم
+            </button>
+            <button class="test-button" onclick="testAzkarSound('general')">
+                <i class="fas fa-hand-holding-heart"></i>
+                أذكار عامة
+            </button>
+        </div>
+
+        <!-- أصوات أخرى -->
+        <div class="test-section">
+            <h2 class="section-title">
+                <i class="fas fa-music"></i>
+                أصوات أخرى
+            </h2>
+            <button class="test-button" onclick="testQuranSound()">
+                <i class="fas fa-book-quran"></i>
+                تذكير القرآن
+            </button>
+            <button class="test-button" onclick="testTasbihSound()">
+                <i class="fas fa-pray"></i>
+                صوت التسبيح
+            </button>
+            <button class="test-button" onclick="testGeneralNotification()">
+                <i class="fas fa-bell"></i>
+                إشعار عام
+            </button>
+            <button class="test-button" onclick="testVibration()">
+                <i class="fas fa-mobile-alt"></i>
+                اختبار الاهتزاز
+            </button>
+        </div>
+
+        <!-- اختبارات الإشعارات -->
+        <div class="test-section">
+            <h2 class="section-title">
+                <i class="fas fa-bell"></i>
+                اختبارات الإشعارات
+            </h2>
+            <button class="test-button" onclick="testNotificationWithSound('prayer', 'fajr')">
+                <i class="fas fa-mosque"></i>
+                إشعار صلاة + صوت
+            </button>
+            <button class="test-button" onclick="testNotificationWithSound('azkar', 'morning')">
+                <i class="fas fa-hands-praying"></i>
+                إشعار أذكار + صوت
+            </button>
+            <button class="test-button" onclick="testNotificationWithSound('quran')">
+                <i class="fas fa-book-quran"></i>
+                إشعار قرآن + صوت
+            </button>
+            <button class="test-button" onclick="requestNotificationPermission()">
+                <i class="fas fa-key"></i>
+                طلب إذن الإشعارات
+            </button>
+        </div>
+    </div>
+
+    <!-- عمليات مجمعة -->
+    <div class="control-panel">
+        <h2 class="section-title">
+            <i class="fas fa-layer-group"></i>
+            عمليات مجمعة
+        </h2>
+        <div class="control-group">
+            <button class="test-button success" onclick="testAllPrayerSounds()">
+                <i class="fas fa-play-circle"></i>
+                اختبار جميع أصوات الصلاة
+            </button>
+            <button class="test-button success" onclick="testAllAzkarSounds()">
+                <i class="fas fa-play-circle"></i>
+                اختبار جميع أصوات الأذكار
+            </button>
+            <button class="test-button warning" onclick="generateDemoSounds()">
+                <i class="fas fa-magic"></i>
+                إنشاء أصوات تجريبية
+            </button>
+            <button class="test-button warning" onclick="resetAudioSettings()">
+                <i class="fas fa-undo"></i>
+                إعادة تعيين الإعدادات
+            </button>
+        </div>
+    </div>
+
+    <!-- سجل الاختبارات -->
+    <div class="control-panel">
+        <h2 class="section-title">
+            <i class="fas fa-list"></i>
+            سجل الاختبارات
+        </h2>
+        <div class="test-log" id="testLog">
+            <div class="log-entry">
+                <span class="log-time">[جاري التحميل...]</span>
+                بدء نظام اختبار الأصوات
+            </div>
+        </div>
+        <button class="test-button warning" onclick="clearTestLog()">
+            <i class="fas fa-trash"></i>
+            مسح السجل
+        </button>
+    </div>
+
+    <!-- عناصر تحكم طوارئ -->
+    <div class="emergency-controls">
+        <h3>🚨 عناصر تحكم الطوارئ</h3>
+        <p>استخدم هذه الأزرار في حالة وجود مشاكل في الصوت</p>
+        <button class="emergency-button" onclick="stopAllSounds()">
+            <i class="fas fa-stop"></i>
+            إيقاف جميع الأصوات
+        </button>
+        <button class="emergency-button" onclick="disableAllAudio()">
+            <i class="fas fa-volume-mute"></i>
+            تعطيل الصوت تماماً
+        </button>
+        <button class="emergency-button" onclick="resetAudioSystem()">
+            <i class="fas fa-power-off"></i>
+            إعادة تشغيل نظام الصوت
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTestPage();
+    checkSystemStatus();
+    setupVolumeControl();
+});
+
+function initializeTestPage() {
+    log('تم تحميل صفحة اختبار الأصوات');
+    log('جاري فحص النظام...');
+}
+
+function checkSystemStatus() {
+    // فحص دعم الإشعارات
+    const notificationSupport = 'Notification' in window;
+    updateStatus('notificationSupport', notificationSupport ? 'مدعوم' : 'غير مدعوم', notificationSupport);
+
+    // فحص إذن الإشعارات
+    if (notificationSupport) {
+        const permission = Notification.permission;
+        updateStatus('notificationPermission', permission === 'granted' ? 'مفعل' : permission === 'denied' ? 'مرفوض' : 'لم يُطلب', permission === 'granted');
+    } else {
+        updateStatus('notificationPermission', 'غير متاح', false);
+    }
+
+    // فحص دعم الصوت
+    const audioSupport = 'Audio' in window;
+    updateStatus('audioSupport', audioSupport ? 'مدعوم' : 'غير مدعوم', audioSupport);
+
+    // فحص دعم الاهتزاز
+    const vibrationSupport = 'vibrate' in navigator;
+    updateStatus('vibrationSupport', vibrationSupport ? 'مدعوم' : 'غير مدعوم', vibrationSupport);
+
+    // فحص مدير الصوت
+    const audioManagerAvailable = typeof window.audioManager !== 'undefined';
+    updateStatus('audioManagerStatus', audioManagerAvailable ? 'متاح' : 'غير متاح', audioManagerAvailable);
+
+    if (audioManagerAvailable) {
+        log('مدير الصوت متاح ومفعل ✅');
+    } else {
+        log('تحذير: مدير الصوت غير متاح ⚠️');
+    }
+}
+
+function updateStatus(elementId, text, isGood) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = text;
+        element.className = `status-value ${isGood ? 'status-enabled' : 'status-disabled'}`;
+    }
+}
+
+function setupVolumeControl() {
+    const slider = document.getElementById('testVolumeSlider');
+    const display = document.getElementById('volumeDisplay');
+    
+    slider.addEventListener('input', function() {
+        const volume = this.value;
+        display.textContent = volume + '%';
+        
+        if (window.audioManager) {
+            window.audioManager.updateSettings({ volume: volume / 100 });
+            log(`تم تحديث مستوى الصوت إلى ${volume}%`);
+        }
+    });
+}
+
+function log(message) {
+    const logElement = document.getElementById('testLog');
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+    logElement.appendChild(entry);
+    logElement.scrollTop = logElement.scrollHeight;
+}
+
+async function testPrayerSound(prayer) {
+    log(`اختبار صوت صلاة ${prayer}...`);
+    try {
+        if (window.audioManager) {
+            await window.audioManager.testPrayerSound(prayer);
+            log(`✅ تم تشغيل صوت صلاة ${prayer} بنجاح`);
+        } else {
+            throw new Error('مدير الصوت غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في تشغيل صوت صلاة ${prayer}: ${error.message}`);
+    }
+}
+
+async function testAzkarSound(type) {
+    log(`اختبار صوت أذكار ${type}...`);
+    try {
+        if (window.audioManager) {
+            await window.audioManager.testAzkarSound(type);
+            log(`✅ تم تشغيل صوت أذكار ${type} بنجاح`);
+        } else {
+            throw new Error('مدير الصوت غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في تشغيل صوت أذكار ${type}: ${error.message}`);
+    }
+}
+
+async function testQuranSound() {
+    log('اختبار صوت تذكير القرآن...');
+    try {
+        if (window.audioManager) {
+            await window.audioManager.playQuranSound();
+            log('✅ تم تشغيل صوت تذكير القرآن بنجاح');
+        } else {
+            throw new Error('مدير الصوت غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في تشغيل صوت تذكير القرآن: ${error.message}`);
+    }
+}
+
+async function testTasbihSound() {
+    log('اختبار صوت التسبيح...');
+    try {
+        if (window.audioManager) {
+            await window.audioManager.playTasbehSound();
+            log('✅ تم تشغيل صوت التسبيح بنجاح');
+        } else {
+            throw new Error('مدير الصوت غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في تشغيل صوت التسبيح: ${error.message}`);
+    }
+}
+
+async function testGeneralNotification() {
+    log('اختبار صوت الإشعار العام...');
+    try {
+        if (window.audioManager) {
+            await window.audioManager.playGeneralNotification();
+            log('✅ تم تشغيل صوت الإشعار العام بنجاح');
+        } else {
+            throw new Error('مدير الصوت غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في تشغيل صوت الإشعار العام: ${error.message}`);
+    }
+}
+
+function testVibration() {
+    log('اختبار الاهتزاز...');
+    try {
+        if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200, 100, 200]);
+            log('✅ تم تشغيل الاهتزاز بنجاح');
+        } else {
+            throw new Error('الاهتزاز غير مدعوم في هذا الجهاز');
+        }
+    } catch (error) {
+        log(`❌ خطأ في تشغيل الاهتزاز: ${error.message}`);
+    }
+}
+
+async function testNotificationWithSound(type, subType) {
+    log(`اختبار إشعار ${type} مع صوت...`);
+    try {
+        if (window.islamicNotifications) {
+            let title, message, options;
+            
+            switch(type) {
+                case 'prayer':
+                    title = `حان وقت صلاة ${subType}`;
+                    message = 'اختبار إشعار الصلاة مع الصوت';
+                    options = { type: 'prayer', subType: subType };
+                    break;
+                case 'azkar':
+                    title = `تذكير ${subType}`;
+                    message = 'اختبار إشعار الأذكار مع الصوت';
+                    options = { type: 'azkar', subType: subType };
+                    break;
+                case 'quran':
+                    title = 'تذكير قراءة القرآن';
+                    message = 'اختبار إشعار القرآن مع الصوت';
+                    options = { type: 'quran' };
+                    break;
+            }
+            
+            window.islamicNotifications.showNotification(title, message, options);
+            log(`✅ تم إرسال إشعار ${type} مع الصوت بنجاح`);
+        } else {
+            throw new Error('خدمة الإشعارات غير متاحة');
+        }
+    } catch (error) {
+        log(`❌ خطأ في إرسال إشعار ${type}: ${error.message}`);
+    }
+}
+
+async function requestNotificationPermission() {
+    log('طلب إذن الإشعارات...');
+    try {
+        if ('Notification' in window) {
+            const permission = await Notification.requestPermission();
+            updateStatus('notificationPermission', permission === 'granted' ? 'مفعل' : permission === 'denied' ? 'مرفوض' : 'لم يُطلب', permission === 'granted');
+            log(`✅ حالة إذن الإشعارات: ${permission}`);
+        } else {
+            throw new Error('الإشعارات غير مدعومة في هذا المتصفح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في طلب إذن الإشعارات: ${error.message}`);
+    }
+}
+
+async function testAllPrayerSounds() {
+    log('بدء اختبار جميع أصوات الصلاة...');
+    const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+    
+    for (const prayer of prayers) {
+        await testPrayerSound(prayer);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // انتظار ثانيتين بين كل صوت
+    }
+    
+    log('✅ انتهى اختبار جميع أصوات الصلاة');
+}
+
+async function testAllAzkarSounds() {
+    log('بدء اختبار جميع أصوات الأذكار...');
+    const azkarTypes = ['morning', 'evening', 'sleep', 'general'];
+    
+    for (const type of azkarTypes) {
+        await testAzkarSound(type);
+        await new Promise(resolve => setTimeout(resolve, 1500)); // انتظار ثانية ونصف بين كل صوت
+    }
+    
+    log('✅ انتهى اختبار جميع أصوات الأذكار');
+}
+
+async function generateDemoSounds() {
+    log('بدء إنشاء الأصوات التجريبية...');
+    try {
+        if (window.audioGenerator) {
+            await generateAllDemoSounds();
+            log('✅ تم إنشاء جميع الأصوات التجريبية بنجاح');
+        } else {
+            throw new Error('مولد الأصوات غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في إنشاء الأصوات التجريبية: ${error.message}`);
+    }
+}
+
+function resetAudioSettings() {
+    log('إعادة تعيين إعدادات الصوت...');
+    try {
+        if (window.audioManager) {
+            window.audioManager.updateSettings({
+                enabled: true,
+                volume: 0.7,
+                muteAt: { start: '23:00', end: '06:00' },
+                useVibration: true
+            });
+            
+            // تحديث شريط التمرير
+            document.getElementById('testVolumeSlider').value = 70;
+            document.getElementById('volumeDisplay').textContent = '70%';
+            
+            log('✅ تم إعادة تعيين إعدادات الصوت بنجاح');
+        } else {
+            throw new Error('مدير الصوت غير متاح');
+        }
+    } catch (error) {
+        log(`❌ خطأ في إعادة تعيين إعدادات الصوت: ${error.message}`);
+    }
+}
+
+function clearTestLog() {
+    const logElement = document.getElementById('testLog');
+    logElement.innerHTML = '<div class="log-entry"><span class="log-time">[تم المسح]</span> تم مسح سجل الاختبارات</div>';
+    log('تم مسح السجل وبدء سجل جديد');
+}
+
+function stopAllSounds() {
+    log('🛑 إيقاف جميع الأصوات...');
+    try {
+        // إيقاف جميع عناصر الصوت
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        
+        // إيقاف AudioContext
+        if (window.audioManager && window.audioManager.audioContext) {
+            window.audioManager.audioContext.suspend();
+        }
+        
+        log('✅ تم إيقاف جميع الأصوات');
+    } catch (error) {
+        log(`❌ خطأ في إيقاف الأصوات: ${error.message}`);
+    }
+}
+
+function disableAllAudio() {
+    log('🔇 تعطيل جميع الأصوات...');
+    try {
+        if (window.audioManager) {
+            window.audioManager.updateSettings({ enabled: false });
+        }
+        
+        updateStatus('audioManagerStatus', 'معطل', false);
+        log('✅ تم تعطيل نظام الصوت');
+    } catch (error) {
+        log(`❌ خطأ في تعطيل الصوت: ${error.message}`);
+    }
+}
+
+function resetAudioSystem() {
+    log('🔄 إعادة تشغيل نظام الصوت...');
+    try {
+        // إعادة تمكين الصوت
+        if (window.audioManager) {
+            window.audioManager.updateSettings({ enabled: true });
+        }
+        
+        // إعادة فحص النظام
+        setTimeout(() => {
+            checkSystemStatus();
+            log('✅ تم إعادة تشغيل نظام الصوت');
+        }, 1000);
+        
+    } catch (error) {
+        log(`❌ خطأ في إعادة تشغيل نظام الصوت: ${error.message}`);
+    }
+}
+</script>
+{% endblock %}

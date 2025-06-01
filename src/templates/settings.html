@@ -1,0 +1,989 @@
+{% extends "base.html" %}
+
+{% block title %}الإعدادات - Settings{% endblock %}
+
+{% block styles %}
+<style>
+    .settings-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 1rem;
+    }
+
+    .settings-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 2px solid var(--border-color);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .settings-description {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .settings-sections {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .settings-section {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .settings-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-color);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-icon {
+        font-size: 2rem;
+        margin-left: 1rem;
+        color: var(--primary-color);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-description {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        flex: 1;
+    }
+
+    .setting-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-width: 200px;
+    }
+
+    .volume-slider {
+        flex: 1;
+        height: 5px;
+        border-radius: 5px;
+        background: var(--border-color);
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        cursor: pointer;
+    }
+
+    .volume-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        cursor: pointer;
+        border: none;
+    }
+
+    .time-input {
+        padding: 0.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        text-align: center;
+        width: 80px;
+    }
+
+    .time-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .test-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .test-btn {
+        padding: 0.7rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .test-btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    .save-settings-btn {
+        background: linear-gradient(135deg, var(--primary-color), #27ae60);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 2rem auto;
+        display: block;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+
+    .save-settings-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .notification-status {
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .status-granted {
+        background: rgba(39, 174, 96, 0.1);
+        border: 2px solid #27ae60;
+        color: #27ae60;
+    }
+
+    .status-denied {
+        background: rgba(231, 76, 60, 0.1);
+        border: 2px solid #e74c3c;
+        color: #e74c3c;
+    }
+
+    .status-default {
+        background: rgba(243, 156, 18, 0.1);
+        border: 2px solid #f39c12;
+        color: #f39c12;
+    }
+
+    .advanced-settings {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .advanced-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .quick-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-action-btn {
+        padding: 0.8rem 1.5rem;
+        border: 2px solid var(--primary-color);
+        background: transparent;
+        color: var(--primary-color);
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .quick-action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .settings-sections {
+            grid-template-columns: 1fr;
+        }
+        
+        .setting-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .setting-control {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .test-buttons, .quick-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-header">
+        <h1 class="settings-title">⚙️ الإعدادات</h1>
+        <p class="settings-description">
+            تخصيص التطبيق الإسلامي حسب تفضيلاتك
+        </p>
+    </div>
+
+    <div class="settings-sections">
+        <!-- إعدادات الصوت -->
+        <div class="settings-section">
+            <div class="section-header">
+                <div class="section-icon">🔊</div>
+                <h2 class="section-title">إعدادات الصوت</h2>
+            </div>
+            <p class="section-description">
+                تحكم في أصوات التنبيهات والأذان والأذكار
+            </p>
+            
+            <div class="setting-item">
+                <span class="setting-label">تفعيل الأصوات</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="audioEnabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">مستوى الصوت العام</span>
+                <div class="setting-control">
+                    <div class="volume-control">
+                        <span>🔉</span>
+                        <input type="range" id="masterVolume" class="volume-slider" min="0" max="100" value="70">
+                        <span id="volumeValue">70%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">الوضع الصامت من</span>
+                <div class="setting-control">
+                    <input type="time" id="silentStart" class="time-input" value="22:00">
+                    <span>إلى</span>
+                    <input type="time" id="silentEnd" class="time-input" value="06:00">
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">تفعيل الاهتزاز</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="vibrationEnabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testPrayerSound()">اختبار أذان</button>
+                <button class="test-btn" onclick="testAzkarSound()">اختبار أذكار</button>
+                <button class="test-btn" onclick="testNotificationSound()">اختبار إشعار</button>
+            </div>
+        </div>
+
+        <!-- إعدادات التنبيهات -->
+        <div class="settings-section">
+            <div class="section-header">
+                <div class="section-icon">🔔</div>
+                <h2 class="section-title">إعدادات التنبيهات</h2>
+            </div>
+            <p class="section-description">
+                تخصيص تنبيهات الصلاة والأذكار والقرآن
+            </p>
+
+            <div id="notificationStatus" class="notification-status">
+                جاري فحص حالة التنبيهات...
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">تنبيهات صلاة الفجر</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="fajrNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">تنبيهات باقي الصلوات</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="regularPrayerNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">أذكار الصباح</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="morningAzkarNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">أذكار المساء</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="eveningAzkarNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">أذكار النوم</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sleepAzkarNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">تذكير القرآن اليومي</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="quranNotifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testNotification()">اختبار التنبيه</button>
+                <button class="test-btn" onclick="requestNotificationPermission()">طلب الإذن</button>
+            </div>
+        </div>
+
+        <!-- إعدادات المظهر -->
+        <div class="settings-section">
+            <div class="section-header">
+                <div class="section-icon">🎨</div>
+                <h2 class="section-title">إعدادات المظهر</h2>
+            </div>
+            <p class="section-description">
+                تخصيص ألوان ومظهر التطبيق
+            </p>
+
+            <div class="setting-item">
+                <span class="setting-label">المظهر الحالي</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="themeStatus">الداكن</span>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">حجم الخط</span>
+                <div class="setting-control">
+                    <select id="fontSize" style="padding: 0.5rem; border-radius: 5px; border: 2px solid var(--border-color);">
+                        <option value="small">صغير</option>
+                        <option value="medium" selected>متوسط</option>
+                        <option value="large">كبير</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="test-buttons">
+                <button class="test-btn" onclick="toggleTheme()">تبديل المظهر</button>
+                <button class="test-btn" onclick="resetTheme()">إعادة تعيين</button>
+            </div>
+        </div>
+
+        <!-- إعدادات التطبيق العامة -->
+        <div class="settings-section">
+            <div class="section-header">
+                <div class="section-icon">⚙️</div>
+                <h2 class="section-title">الإعدادات العامة</h2>
+            </div>
+            <p class="section-description">
+                إعدادات عامة للتطبيق والبيانات
+            </p>
+
+            <div class="setting-item">
+                <span class="setting-label">حفظ البيانات محلياً</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="saveDataLocally" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">تحديث تلقائي لأوقات الصلاة</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoUpdatePrayerTimes" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <span class="setting-label">إظهار الحكم الإسلامية</span>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showWisdomQuotes" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="advanced-settings">
+                <h3 class="advanced-title">🔧 إعدادات متقدمة</h3>
+                
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="exportSettings()">تصدير الإعدادات</button>
+                    <button class="quick-action-btn" onclick="importSettings()">استيراد الإعدادات</button>
+                    <button class="quick-action-btn" onclick="resetAllSettings()">إعادة تعيين الكل</button>
+                    <button class="quick-action-btn" onclick="clearCache()">مسح الذاكرة المؤقتة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- أدوات الاختبار والتشخيص -->
+        <div class="settings-section">
+            <div class="section-header">
+                <div class="section-icon">🧪</div>
+                <h2 class="section-title">أدوات الاختبار</h2>
+            </div>
+            <p class="section-description">
+                اختبار وتشخيص وظائف التطبيق
+            </p>
+
+            <div class="test-buttons">
+                <button class="test-btn" onclick="window.location.href='/sound_test'">اختبار الأصوات الشامل</button>
+                <button class="test-btn" onclick="window.location.href='/notification_test'">اختبار التنبيهات</button>
+                <button class="test-btn" onclick="testAllFeatures()">اختبار جميع الميزات</button>
+                <button class="test-btn" onclick="generateSystemReport()">تقرير النظام</button>
+            </div>
+
+            <div class="advanced-settings">
+                <h3 class="advanced-title">📊 معلومات النظام</h3>
+                <div id="systemInfo" style="background: var(--input-bg); padding: 1rem; border-radius: 10px; font-family: monospace; font-size: 0.9rem; color: var(--text-secondary);">
+                    جاري تحميل معلومات النظام...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="save-settings-btn" onclick="saveAllSettings()">
+        💾 حفظ جميع الإعدادات
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadAllSettings();
+    checkNotificationStatus();
+    updateSystemInfo();
+    
+    // Setup event listeners
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Volume slider
+    const volumeSlider = document.getElementById('masterVolume');
+    const volumeValue = document.getElementById('volumeValue');
+    
+    volumeSlider.addEventListener('input', function() {
+        volumeValue.textContent = this.value + '%';
+        if (window.audioManager) {
+            window.audioManager.setMasterVolume(this.value / 100);
+        }
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeStatus = document.getElementById('themeStatus');
+    
+    themeToggle.addEventListener('change', function() {
+        toggleTheme();
+        themeStatus.textContent = this.checked ? 'الفاتح' : 'الداكن';
+    });
+
+    // Auto-save settings on change
+    const settingInputs = document.querySelectorAll('input[type="checkbox"], input[type="range"], input[type="time"], select');
+    settingInputs.forEach(input => {
+        input.addEventListener('change', saveAllSettings);
+    });
+}
+
+function loadAllSettings() {
+    // Load audio settings
+    const audioSettings = JSON.parse(localStorage.getItem('audioSettings')) || {};
+    document.getElementById('audioEnabled').checked = audioSettings.enabled !== false;
+    document.getElementById('masterVolume').value = audioSettings.masterVolume || 70;
+    document.getElementById('volumeValue').textContent = (audioSettings.masterVolume || 70) + '%';
+    document.getElementById('silentStart').value = audioSettings.silentHours?.start || '22:00';
+    document.getElementById('silentEnd').value = audioSettings.silentHours?.end || '06:00';
+    document.getElementById('vibrationEnabled').checked = audioSettings.vibrationEnabled !== false;
+
+    // Load notification settings
+    const notificationSettings = JSON.parse(localStorage.getItem('islamicReminders')) || {};
+    document.getElementById('fajrNotifications').checked = notificationSettings.fajr?.enabled !== false;
+    document.getElementById('regularPrayerNotifications').checked = 
+        (notificationSettings.dhuhr?.enabled !== false) && 
+        (notificationSettings.asr?.enabled !== false) && 
+        (notificationSettings.maghrib?.enabled !== false) && 
+        (notificationSettings.isha?.enabled !== false);
+    document.getElementById('morningAzkarNotifications').checked = notificationSettings.morning_azkar?.enabled !== false;
+    document.getElementById('eveningAzkarNotifications').checked = notificationSettings.evening_azkar?.enabled !== false;
+    document.getElementById('sleepAzkarNotifications').checked = notificationSettings.sleep_azkar?.enabled !== false;
+    document.getElementById('quranNotifications').checked = notificationSettings.daily_quran?.enabled !== false;
+
+    // Load theme settings
+    const currentTheme = document.body.getAttribute('data-theme');
+    document.getElementById('themeToggle').checked = currentTheme === 'light';
+    document.getElementById('themeStatus').textContent = currentTheme === 'light' ? 'الفاتح' : 'الداكن';
+
+    // Load general settings
+    document.getElementById('saveDataLocally').checked = localStorage.getItem('saveDataLocally') !== 'false';
+    document.getElementById('autoUpdatePrayerTimes').checked = localStorage.getItem('autoUpdatePrayerTimes') !== 'false';
+    document.getElementById('showWisdomQuotes').checked = localStorage.getItem('showWisdomQuotes') !== 'false';
+}
+
+function saveAllSettings() {
+    // Save audio settings
+    const audioSettings = {
+        enabled: document.getElementById('audioEnabled').checked,
+        masterVolume: parseInt(document.getElementById('masterVolume').value),
+        silentHours: {
+            start: document.getElementById('silentStart').value,
+            end: document.getElementById('silentEnd').value
+        },
+        vibrationEnabled: document.getElementById('vibrationEnabled').checked
+    };
+    localStorage.setItem('audioSettings', JSON.stringify(audioSettings));
+
+    // Update audio manager
+    if (window.audioManager) {
+        window.audioManager.updateSettings(audioSettings);
+    }
+
+    // Save notification settings
+    const currentReminders = JSON.parse(localStorage.getItem('islamicReminders')) || {};
+    
+    // Update prayer notifications
+    if (currentReminders.fajr) currentReminders.fajr.enabled = document.getElementById('fajrNotifications').checked;
+    
+    const regularPrayerEnabled = document.getElementById('regularPrayerNotifications').checked;
+    ['dhuhr', 'asr', 'maghrib', 'isha'].forEach(prayer => {
+        if (currentReminders[prayer]) currentReminders[prayer].enabled = regularPrayerEnabled;
+    });
+
+    // Update azkar notifications
+    if (currentReminders.morning_azkar) currentReminders.morning_azkar.enabled = document.getElementById('morningAzkarNotifications').checked;
+    if (currentReminders.evening_azkar) currentReminders.evening_azkar.enabled = document.getElementById('eveningAzkarNotifications').checked;
+    if (currentReminders.sleep_azkar) currentReminders.sleep_azkar.enabled = document.getElementById('sleepAzkarNotifications').checked;
+    if (currentReminders.daily_quran) currentReminders.daily_quran.enabled = document.getElementById('quranNotifications').checked;
+
+    localStorage.setItem('islamicReminders', JSON.stringify(currentReminders));
+
+    // Update notification service
+    if (window.islamicNotifications) {
+        window.islamicNotifications.reminders = currentReminders;
+        window.islamicNotifications.scheduleAllReminders();
+    }
+
+    // Save general settings
+    localStorage.setItem('saveDataLocally', document.getElementById('saveDataLocally').checked);
+    localStorage.setItem('autoUpdatePrayerTimes', document.getElementById('autoUpdatePrayerTimes').checked);
+    localStorage.setItem('showWisdomQuotes', document.getElementById('showWisdomQuotes').checked);
+
+    // Show confirmation
+    showSaveConfirmation();
+}
+
+function showSaveConfirmation() {
+    const btn = document.querySelector('.save-settings-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '✅ تم الحفظ بنجاح!';
+    btn.style.background = '#27ae60';
+    
+    setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+    }, 2000);
+}
+
+function checkNotificationStatus() {
+    const statusDiv = document.getElementById('notificationStatus');
+    
+    if (!('Notification' in window)) {
+        statusDiv.className = 'notification-status status-denied';
+        statusDiv.textContent = '❌ المتصفح لا يدعم التنبيهات';
+        return;
+    }
+
+    switch (Notification.permission) {
+        case 'granted':
+            statusDiv.className = 'notification-status status-granted';
+            statusDiv.textContent = '✅ التنبيهات مفعلة ومسموحة';
+            break;
+        case 'denied':
+            statusDiv.className = 'notification-status status-denied';
+            statusDiv.textContent = '❌ التنبيهات محظورة - يرجى السماح من إعدادات المتصفح';
+            break;
+        default:
+            statusDiv.className = 'notification-status status-default';
+            statusDiv.textContent = '⚠️ يرجى السماح بالتنبيهات';
+    }
+}
+
+function updateSystemInfo() {
+    const systemInfo = document.getElementById('systemInfo');
+    const info = {
+        'المتصفح': navigator.userAgent.split(') ')[0].split('(')[1] || 'غير معروف',
+        'اللغة': navigator.language,
+        'المنطقة الزمنية': Intl.DateTimeFormat().resolvedOptions().timeZone,
+        'دعم التنبيهات': 'Notification' in window ? 'نعم' : 'لا',
+        'دعم الصوت': 'Audio' in window ? 'نعم' : 'لا',
+        'دعم الموقع': 'geolocation' in navigator ? 'نعم' : 'لا',
+        'حالة الاتصال': navigator.onLine ? 'متصل' : 'غير متصل',
+        'تاريخ آخر زيارة': new Date().toLocaleString('ar-SA')
+    };
+
+    systemInfo.innerHTML = Object.entries(info)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('<br>');
+}
+
+// Test functions
+function testPrayerSound() {
+    if (window.audioManager) {
+        window.audioManager.playPrayerSound('fajr');
+    }
+}
+
+function testAzkarSound() {
+    if (window.audioManager) {
+        window.audioManager.playAzkarSound('morning');
+    }
+}
+
+function testNotificationSound() {
+    if (window.audioManager) {
+        window.audioManager.playGeneralNotification();
+    }
+}
+
+function testNotification() {
+    if (window.islamicNotifications) {
+        window.islamicNotifications.testNotification();
+    }
+}
+
+async function requestNotificationPermission() {
+    if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        checkNotificationStatus();
+        
+        if (permission === 'granted') {
+            testNotification();
+        }
+    }
+}
+
+function toggleTheme() {
+    if (window.themeManager) {
+        window.themeManager.toggleTheme();
+    } else {
+        // Fallback theme toggle
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    }
+}
+
+function resetTheme() {
+    document.body.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+    document.getElementById('themeToggle').checked = false;
+    document.getElementById('themeStatus').textContent = 'الداكن';
+}
+
+function exportSettings() {
+    const settings = {
+        audio: JSON.parse(localStorage.getItem('audioSettings') || '{}'),
+        notifications: JSON.parse(localStorage.getItem('islamicReminders') || '{}'),
+        theme: localStorage.getItem('theme') || 'dark',
+        general: {
+            saveDataLocally: localStorage.getItem('saveDataLocally'),
+            autoUpdatePrayerTimes: localStorage.getItem('autoUpdatePrayerTimes'),
+            showWisdomQuotes: localStorage.getItem('showWisdomQuotes')
+        }
+    };
+
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'islamic-app-settings.json';
+    link.click();
+    
+    URL.revokeObjectURL(url);
+}
+
+function importSettings() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const settings = JSON.parse(e.target.result);
+                    
+                    // Import settings
+                    if (settings.audio) localStorage.setItem('audioSettings', JSON.stringify(settings.audio));
+                    if (settings.notifications) localStorage.setItem('islamicReminders', JSON.stringify(settings.notifications));
+                    if (settings.theme) localStorage.setItem('theme', settings.theme);
+                    if (settings.general) {
+                        Object.entries(settings.general).forEach(([key, value]) => {
+                            if (value !== null) localStorage.setItem(key, value);
+                        });
+                    }
+                    
+                    // Reload settings
+                    loadAllSettings();
+                    alert('تم استيراد الإعدادات بنجاح!');
+                    
+                } catch (error) {
+                    alert('خطأ في قراءة ملف الإعدادات');
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+    
+    input.click();
+}
+
+function resetAllSettings() {
+    if (confirm('هل أنت متأكد من إعادة تعيين جميع الإعدادات؟')) {
+        // Clear all settings
+        ['audioSettings', 'islamicReminders', 'theme', 'saveDataLocally', 'autoUpdatePrayerTimes', 'showWisdomQuotes'].forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Reset to defaults
+        document.body.setAttribute('data-theme', 'dark');
+        loadAllSettings();
+        
+        alert('تم إعادة تعيين جميع الإعدادات');
+    }
+}
+
+function clearCache() {
+    if (confirm('هل تريد مسح الذاكرة المؤقتة؟ سيتم إعادة تحميل الصفحة.')) {
+        // Clear cache and reload
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+        
+        // Clear session storage
+        sessionStorage.clear();
+        
+        // Reload page
+        window.location.reload(true);
+    }
+}
+
+function testAllFeatures() {
+    const tests = [
+        () => testNotification(),
+        () => testPrayerSound(),
+        () => testAzkarSound(),
+        () => testNotificationSound()
+    ];
+    
+    let testIndex = 0;
+    const runNextTest = () => {
+        if (testIndex < tests.length) {
+            tests[testIndex]();
+            testIndex++;
+            setTimeout(runNextTest, 2000);
+        } else {
+            alert('تم الانتهاء من اختبار جميع الميزات');
+        }
+    };
+    
+    runNextTest();
+}
+
+function generateSystemReport() {
+    const report = {
+        timestamp: new Date().toISOString(),
+        browser: navigator.userAgent,
+        settings: {
+            audio: JSON.parse(localStorage.getItem('audioSettings') || '{}'),
+            notifications: JSON.parse(localStorage.getItem('islamicReminders') || '{}')
+        },
+        permissions: {
+            notifications: Notification.permission,
+            geolocation: 'geolocation' in navigator
+        },
+        features: {
+            audioSupport: 'Audio' in window,
+            notificationSupport: 'Notification' in window,
+            serviceWorkerSupport: 'serviceWorker' in navigator
+        }
+    };
+    
+    const reportStr = JSON.stringify(report, null, 2);
+    const reportBlob = new Blob([reportStr], {type: 'application/json'});
+    const url = URL.createObjectURL(reportBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'islamic-app-system-report.json';
+    link.click();
+    
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

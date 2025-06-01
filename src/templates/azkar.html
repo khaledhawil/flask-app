@@ -1,0 +1,1744 @@
+{% extends "base.html" %}
+
+{% block title %}الأذكار الإسلامية - Islamic Azkar{% endblock %}
+
+{% block styles %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Scheherazade+New:wght@400;700&display=swap');
+    
+    .islamic-pattern {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 25% 25%, rgba(255,215,0,0.03) 2px, transparent 2px),
+            radial-gradient(circle at 75% 75%, rgba(255,215,0,0.03) 2px, transparent 2px);
+        background-size: 80px 80px;
+        z-index: -1;
+    }
+
+    .azkar-header {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+        margin-bottom: 2rem;
+        border-radius: 0 0 25px 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .azkar-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+        opacity: 0.1;
+    }
+
+    .azkar-title {
+        font-family: 'Amiri', serif;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .azkar-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .azkar-verse {
+        font-family: 'Amiri', serif;
+        font-size: 1.4rem;
+        line-height: 1.8;
+        direction: rtl;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .verse-translation {
+        font-size: 1rem;
+        opacity: 0.8;
+        direction: ltr;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Time-based tabs */
+    .time-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .time-tab {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: var(--text-color);
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .time-tab.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .time-tab:hover:not(.active) {
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+    }
+
+    /* Azkar Cards */
+    .azkar-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .azkar-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1.5rem 0;
+        box-shadow: var(--shadow-lg);
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .azkar-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary-color), #10b981);
+    }
+
+    .azkar-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+    }
+
+    .azkar-arabic {
+        font-family: 'Amiri', serif;
+        font-size: 1.8rem;
+        line-height: 2.2;
+        color: var(--text-color);
+        direction: rtl;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(16, 185, 129, 0.05);
+        border-radius: 12px;
+    }
+
+    .azkar-translation {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        font-style: italic;
+        text-align: center;
+        margin-bottom: 1rem;
+        direction: ltr;
+    }
+
+    .azkar-reference {
+        font-size: 0.9rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .azkar-count {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .count-badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .counter-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .counter-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .counter-btn:hover {
+        background: #059669;
+        transform: scale(1.1);
+    }
+
+    .counter-display {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        min-width: 60px;
+        text-align: center;
+    }
+
+    .azkar-benefits {
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .benefits-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .benefits-text {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    /* Action buttons */
+    .azkar-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        color: var(--text-color);
+        padding: 0.7rem 1.5rem;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        transform: translateY(-1px);
+    }
+
+    .action-btn.primary {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .action-btn.primary:hover {
+        background: #059669;
+    }
+
+    /* Statistics */
+    .azkar-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    /* Statistics Widget */
+    .stats-widget {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid var(--border-color);
+    }
+
+    .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .stats-header h3 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 1.2rem;
+    }
+
+    .refresh-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .refresh-btn:hover {
+        background: #059669;
+        transform: rotate(360deg);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg-color);
+        border-radius: 0.8rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    /* Quick access buttons */
+    .quick-access {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .quick-btn {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+        text-decoration: none;
+    }
+
+    .quick-btn:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .quick-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .quick-desc {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    /* Progress bar */
+    .progress-section {
+        margin: 1.5rem 0;
+    }
+
+    .progress-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .progress-bar {
+        background: var(--border-color);
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, var(--primary-color), #10b981);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 10px;
+    }
+
+    .progress-text {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    /* Loading and animations */
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    /* Special categories */
+    .category-badge {
+        display: inline-block;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--primary-color);
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .azkar-title {
+            font-size: 2rem;
+        }
+        
+        .time-tabs {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .time-tab {
+            min-width: 200px;
+        }
+        
+        .azkar-arabic {
+            font-size: 1.5rem;
+        }
+        
+        .counter-section {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .azkar-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    /* Notification */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-color);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+        transform: translateX(0);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="islamic-pattern"></div>
+
+<!-- Header Section -->
+<div class="azkar-header">
+    <h1 class="azkar-title">الأذكار الإسلامية</h1>
+    <p class="azkar-subtitle">أذكار الصباح والمساء وجميع الأوقات</p>
+    <div class="azkar-verse">وَاذْكُر رَّبَّكَ فِي نَفْسِكَ تَضَرُّعًا وَخِيفَةً</div>
+    <div class="verse-translation">"And remember your Lord within yourself in humility and in fear"</div>
+</div>
+
+<!-- Statistics Section -->
+<div class="azkar-stats">
+    <div class="stat-card">
+        <div class="stat-number" id="todayCount">0</div>
+        <div class="stat-label">أذكار اليوم</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="completedSets">0</div>
+        <div class="stat-label">المجموعات المكتملة</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="currentStreak">0</div>
+        <div class="stat-label">أيام متتالية</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="totalAzkar">150+</div>
+        <div class="stat-label">إجمالي الأذكار</div>
+    </div>
+</div>
+
+<!-- Quick Access Buttons -->
+<div class="quick-access">
+    <div class="quick-btn" onclick="showMorningAzkar()">
+        <span class="quick-icon">🌅</span>
+        <div class="quick-title">أذكار الصباح</div>
+        <div class="quick-desc">الأذكار المستحبة بعد صلاة الفجر</div>
+    </div>
+    <div class="quick-btn" onclick="showEveningAzkar()">
+        <span class="quick-icon">🌆</span>
+        <div class="quick-title">أذكار المساء</div>
+        <div class="quick-desc">الأذكار المستحبة بعد صلاة العصر</div>
+    </div>
+    <div class="quick-btn" onclick="showSleepAzkar()">
+        <span class="quick-icon">🌙</span>
+        <div class="quick-title">أذكار النوم</div>
+        <div class="quick-desc">الأذكار المستحبة قبل النوم</div>
+    </div>
+    <div class="quick-btn" onclick="showGeneralAzkar()">
+        <span class="quick-icon">📿</span>
+        <div class="quick-title">أذكار عامة</div>
+        <div class="quick-desc">الأذكار والتسابيح العامة</div>
+    </div>
+    <div class="quick-btn" onclick="showPrayerAzkar()">
+        <span class="quick-icon">🤲</span>
+        <div class="quick-title">أذكار الصلاة</div>
+        <div class="quick-desc">الأذكار بعد الصلوات الخمس</div>
+    </div>
+    <div class="quick-btn" onclick="showTravelAzkar()">
+        <span class="quick-icon">✈️</span>
+        <div class="quick-title">أذكار السفر</div>
+        <div class="quick-desc">الأذكار والأدعية للمسافر</div>
+    </div>
+</div>
+
+<!-- Statistics Widget for Authenticated Users -->
+{% if username %}
+<div class="stats-widget">
+    <div class="stats-header">
+        <h3>📊 إحصائياتي اليوم</h3>
+        <button onclick="refreshStats()" class="refresh-btn">🔄</button>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="todayDhikrCount">0</div>
+            <div class="stat-label">تسبيحات اليوم</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="completedAzkar">0</div>
+            <div class="stat-label">أذكار مكتملة</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="completionRate">0%</div>
+            <div class="stat-label">نسبة الإكمال</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="currentStreak">0</div>
+            <div class="stat-label">أيام متتالية</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Time-based Tabs -->
+<div class="time-tabs">
+    <div class="time-tab active" data-time="morning" onclick="switchTab('morning')">
+        🌅 الصباح
+    </div>
+    <div class="time-tab" data-time="evening" onclick="switchTab('evening')">
+        🌆 المساء
+    </div>
+    <div class="time-tab" data-time="sleep" onclick="switchTab('sleep')">
+        🌙 النوم
+    </div>
+    <div class="time-tab" data-time="prayer" onclick="switchTab('prayer')">
+        🤲 الصلاة
+    </div>
+    <div class="time-tab" data-time="general" onclick="switchTab('general')">
+        📿 عامة
+    </div>
+    <div class="time-tab" data-time="travel" onclick="switchTab('travel')">
+        ✈️ السفر
+    </div>
+</div>
+
+<!-- Azkar Container -->
+<div class="azkar-container">
+    <div id="azkarDisplay">
+        <!-- الأذكار ستظهر هنا -->
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Authentication Check -->
+<script>
+    window.isAuthenticated = {{ 'true' if username else 'false' }};
+</script>
+
+<script>
+    // Application State
+    let appState = {
+        currentTab: 'morning',
+        todayCount: parseInt(localStorage.getItem('azkarTodayCount')) || 0,
+        completedSets: parseInt(localStorage.getItem('azkarCompletedSets')) || 0,
+        currentStreak: parseInt(localStorage.getItem('azkarStreak')) || 0,
+        lastDate: localStorage.getItem('azkarLastDate') || '',
+        counters: JSON.parse(localStorage.getItem('azkarCounters')) || {}
+    };
+
+    // Azkar Data
+    const azkarData = {
+        morning: [
+            {
+                id: 'morning_1',
+                arabic: 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ',
+                translation: 'I seek refuge in Allah from Satan, the accursed',
+                reference: 'سورة النحل آية 98',
+                count: 1,
+                benefits: 'يحمي من وسوسة الشيطان ويطرد الأفكار السيئة'
+            },
+            {
+                id: 'morning_2',
+                arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ * قُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+                translation: 'In the name of Allah, the Beneficent, the Merciful. Say: He is Allah, the One! Allah, the Eternal, Absolute; He begets not, nor is He begotten; And there is none like unto Him.',
+                reference: 'سورة الإخلاص',
+                count: 3,
+                benefits: 'تعدل ثلث القرآن وتحصن المؤمن'
+            },
+            {
+                id: 'morning_3',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+                translation: 'Say: I seek refuge with the Lord of the Dawn, From the mischief of created things; From the mischief of Darkness as it overspreads; From the mischief of those who practice secret arts; And from the mischief of the envious one as he practices envy.',
+                reference: 'سورة الفلق',
+                count: 3,
+                benefits: 'حماية من الشرور والحسد والسحر'
+            },
+            {
+                id: 'morning_4',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَٰهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ',
+                translation: 'Say: I seek refuge with the Lord and Cherisher of Mankind, The King (or Ruler) of Mankind, The Allah (for judge) of Mankind,- From the mischief of the Whisperer (of Evil), who withdraws (after his whisper),- (The same) who whispers into the hearts of Mankind,- Among Jinns and among men.',
+                reference: 'سورة الناس',
+                count: 3,
+                benefits: 'حماية من وسوسة الشيطان والجن والإنس'
+            },
+            {
+                id: 'morning_5',
+                arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+                translation: 'Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.',
+                reference: 'آية الكرسي - سورة البقرة آية 255',
+                count: 1,
+                benefits: 'من قرأها في بداية يومه لم يضره شيطان حتى يمسي'
+            },
+            {
+                id: 'morning_6',
+                arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
+                translation: 'O Allah! You are my Lord! None has the right to be worshipped but You. You created me and I am Your slave, and I am faithful to my covenant and my promise as much as I can. I seek refuge with You from all the evil I have done. I acknowledge before You all the blessings You have bestowed upon me, and I confess to You all my sins. So I entreat You to forgive my sins, for nobody can forgive sins except You.',
+                reference: 'صحيح البخاري - سيد الاستغفار',
+                count: 1,
+                benefits: 'سيد الاستغفار، من قالها موقناً بها حين يصبح فمات من يومه دخل الجنة'
+            },
+            {
+                id: 'morning_7',
+                arabic: 'اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ',
+                translation: 'O Allah, by Your grace we enter the morning, and by Your grace we enter the evening. By You we live and by You we die, and to You is the resurrection.',
+                reference: 'سنن الترمذي',
+                count: 1,
+                benefits: 'إقرار بفضل الله ونعمته في كل وقت'
+            },
+            {
+                id: 'morning_8',
+                arabic: 'اللَّهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',
+                translation: 'O Allah, whatever blessing I or any of Your creation have received, it is from You alone, without partner. All praise and thanks are for You.',
+                reference: 'سنن أبي داود',
+                count: 1,
+                benefits: 'شكر الله على نعمه يزيدها ويباركها'
+            },
+            {
+                id: 'morning_9',
+                arabic: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَٰهَ إِلَّا أَنْتَ',
+                translation: 'O Allah, grant me health in my body. O Allah, grant me health in my hearing. O Allah, grant me health in my sight. There is no god but You.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'دعاء بالعافية في البدن والحواس'
+            },
+            {
+                id: 'morning_10',
+                arabic: 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَٰهَ إِلَّا أَنْتَ',
+                translation: 'O Allah, I seek refuge with You from disbelief and poverty, and I seek refuge with You from the punishment of the grave. There is no god but You.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'الاستعاذة من أعظم البلايا والمحن'
+            },
+            {
+                id: 'morning_11',
+                arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي',
+                translation: 'O Allah, I ask You for pardon and well-being in this world and the next. O Allah, I ask You for pardon and well-being in my religion, my worldly affairs, my family and my wealth.',
+                reference: 'سنن ابن ماجه',
+                count: 1,
+                benefits: 'دعاء جامع للعافية في الدين والدنيا'
+            },
+            {
+                id: 'morning_12',
+                arabic: 'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ، وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
+                translation: 'Allah is sufficient for me. There is no god but Him. I have placed my trust in Him, and He is Lord of the Mighty Throne.',
+                reference: 'سنن أبي داود',
+                count: 7,
+                benefits: 'من قالها سبع مرات كفاه الله ما أهمه'
+            },
+            {
+                id: 'morning_13',
+                arabic: 'لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent.',
+                reference: 'صحيح البخاري',
+                count: 100,
+                benefits: 'من قالها مائة مرة كانت له عدل عشر رقاب وكتبت له مائة حسنة'
+            },
+            {
+                id: 'morning_14',
+                arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+                translation: 'Glory be to Allah and praise Him',
+                reference: 'صحيح البخاري',
+                count: 100,
+                benefits: 'من قالها مائة مرة حُطت خطاياه وإن كانت مثل زبد البحر'
+            },
+            {
+                id: 'morning_15',
+                arabic: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'We enter the morning and in the morning the kingdom belongs to Allah. Praise be to Allah. None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent.',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'تذكير بملك الله وقدرته على كل شيء'
+            }
+        ],
+        evening: [
+            {
+                id: 'evening_1',
+                arabic: 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ',
+                translation: 'I seek refuge in Allah from Satan, the accursed',
+                reference: 'سورة النحل آية 98',
+                count: 1,
+                benefits: 'يحمي من وسوسة الشيطان ويطرد الأفكار السيئة'
+            },
+            {
+                id: 'evening_2',
+                arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ * قُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+                translation: 'In the name of Allah, the Beneficent, the Merciful. Say: He is Allah, the One! Allah, the Eternal, Absolute; He begets not, nor is He begotten; And there is none like unto Him.',
+                reference: 'سورة الإخلاص',
+                count: 3,
+                benefits: 'تعدل ثلث القرآن وتحصن المؤمن'
+            },
+            {
+                id: 'evening_3',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+                translation: 'Say: I seek refuge with the Lord of the Dawn, From the mischief of created things; From the mischief of Darkness as it overspreads; From the mischief of those who practice secret arts; And from the mischief of the envious one as he practices envy.',
+                reference: 'سورة الفلق',
+                count: 3,
+                benefits: 'حماية من الشرور والحسد والسحر'
+            },
+            {
+                id: 'evening_4',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَٰهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ',
+                translation: 'Say: I seek refuge with the Lord and Cherisher of Mankind, The King (or Ruler) of Mankind, The Allah (for judge) of Mankind,- From the mischief of the Whisperer (of Evil), who withdraws (after his whisper),- (The same) who whispers into the hearts of Mankind,- Among Jinns and among men.',
+                reference: 'سورة الناس',
+                count: 3,
+                benefits: 'حماية من وسوسة الشيطان والجن والإنس'
+            },
+            {
+                id: 'evening_5',
+                arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+                translation: 'Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.',
+                reference: 'آية الكرسي - سورة البقرة آية 255',
+                count: 1,
+                benefits: 'من قرأها حين يمسي لم يضره شيطان حتى يصبح'
+            },
+            {
+                id: 'evening_6',
+                arabic: 'اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ',
+                translation: 'O Allah, by Your grace we enter the evening, and by Your grace we enter the morning. By You we live and by You we die, and to You is our return.',
+                reference: 'سنن الترمذي',
+                count: 1,
+                benefits: 'إقرار بفضل الله ونعمته في كل وقت'
+            },
+            {
+                id: 'evening_7',
+                arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
+                translation: 'O Allah! You are my Lord! None has the right to be worshipped but You. You created me and I am Your slave, and I am faithful to my covenant and my promise as much as I can. I seek refuge with You from all the evil I have done. I acknowledge before You all the blessings You have bestowed upon me, and I confess to You all my sins. So I entreat You to forgive my sins, for nobody can forgive sins except You.',
+                reference: 'صحيح البخاري - سيد الاستغفار',
+                count: 1,
+                benefits: 'سيد الاستغفار، من قالها موقناً بها حين يمسي فمات من ليلته دخل الجنة'
+            },
+            {
+                id: 'evening_8',
+                arabic: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'We enter the evening and in the evening the kingdom belongs to Allah. Praise be to Allah. None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent.',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'تذكير بملك الله وقدرته على كل شيء'
+            },
+            {
+                id: 'evening_9',
+                arabic: 'اللَّهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ',
+                translation: 'O Allah, whatever blessing I or any of Your creation have received this evening, it is from You alone, without partner. All praise and thanks are for You.',
+                reference: 'سنن أبي داود',
+                count: 1,
+                benefits: 'شكر الله على نعمه يزيدها ويباركها'
+            },
+            {
+                id: 'evening_10',
+                arabic: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَٰهَ إِلَّا أَنْتَ',
+                translation: 'O Allah, grant me health in my body. O Allah, grant me health in my hearing. O Allah, grant me health in my sight. There is no god but You.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'دعاء بالعافية في البدن والحواس'
+            },
+            {
+                id: 'evening_11',
+                arabic: 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَٰهَ إِلَّا أَنْتَ',
+                translation: 'O Allah, I seek refuge with You from disbelief and poverty, and I seek refuge with You from the punishment of the grave. There is no god but You.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'الاستعاذة من أعظم البلايا والمحن'
+            },
+            {
+                id: 'evening_12',
+                arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ خَيْرِ هَٰذِهِ اللَّيْلَةِ وَخَيْرِ مَا فِيهَا، وَأَعُوذُ بِكَ مِنْ شَرِّهَا وَشَرِّ مَا فِيهَا',
+                translation: 'O Allah, I ask You for the good of this night and the good that is in it, and I seek refuge with You from its evil and the evil that is in it.',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'دعاء لطلب خير الليل والاستعاذة من شره'
+            },
+            {
+                id: 'evening_13',
+                arabic: 'رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ رَسُولًا',
+                translation: 'I am pleased with Allah as my Lord, Islam as my religion, and Muhammad as my messenger.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'من قالها ثلاث مرات وجب على الله أن يرضيه يوم القيامة'
+            },
+            {
+                id: 'evening_14',
+                arabic: 'اللَّهُمَّ أَعِنِّي عَلَىٰ ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ',
+                translation: 'O Allah, help me to remember You, to thank You, and to worship You in the best manner.',
+                reference: 'سنن أبي داود',
+                count: 1,
+                benefits: 'دعاء لطلب العون على الذكر والشكر وحسن العبادة'
+            }
+        ],
+        sleep: [
+            {
+                id: 'sleep_1',
+                arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+                translation: 'In Your name O Allah, I die and I live',
+                reference: 'صحيح البخاري',
+                count: 1,
+                benefits: 'تفويض الأمر لله عند النوم'
+            },
+            {
+                id: 'sleep_2',
+                arabic: 'اللَّهُمَّ أَسْلَمْتُ وَجْهِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ، وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ',
+                translation: 'O Allah, I surrender my soul unto You, and I entrust my affair unto You, and I turn my face toward You, and I totally rely on You, in hope and fear of You. Verily there is no refuge nor safe haven from You except with You. I believe in Your Book which You have revealed and in Your Prophet whom You have sent.',
+                reference: 'صحيح البخاري',
+                count: 1,
+                benefits: 'من قالها ثم مات في ليلته مات على الفطرة'
+            },
+            {
+                id: 'sleep_3',
+                arabic: 'سُبْحَانَ اللَّهِ (33) وَالْحَمْدُ لِلَّهِ (33) وَاللَّهُ أَكْبَرُ (34)',
+                translation: 'Glory be to Allah (33), Praise be to Allah (33), Allah is the Greatest (34)',
+                reference: 'صحيح البخاري',
+                count: '33, 33, 34',
+                benefits: 'خير من الدنيا وما فيها كما ذكر النبي صلى الله عليه وسلم'
+            },
+            {
+                id: 'sleep_4',
+                arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+                translation: 'Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.',
+                reference: 'آية الكرسي - سورة البقرة آية 255',
+                count: 1,
+                benefits: 'من قرأها عند النوم لم يقربه شيطان حتى يصبح'
+            },
+            {
+                id: 'sleep_5',
+                arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ * قُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+                translation: 'In the name of Allah, the Beneficent, the Merciful. Say: He is Allah, the One! Allah, the Eternal, Absolute; He begets not, nor is He begotten; And there is none like unto Him.',
+                reference: 'سورة الإخلاص',
+                count: 3,
+                benefits: 'تعدل ثلث القرآن وتحصن النائم'
+            },
+            {
+                id: 'sleep_6',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+                translation: 'Say: I seek refuge with the Lord of the Dawn, From the mischief of created things; From the mischief of Darkness as it overspreads; From the mischief of those who practice secret arts; And from the mischief of the envious one as he practices envy.',
+                reference: 'سورة الفلق',
+                count: 3,
+                benefits: 'حماية من الشرور والحسد والسحر أثناء النوم'
+            },
+            {
+                id: 'sleep_7',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَٰهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ',
+                translation: 'Say: I seek refuge with the Lord and Cherisher of Mankind, The King (or Ruler) of Mankind, The Allah (for judge) of Mankind,- From the mischief of the Whisperer (of Evil), who withdraws (after his whisper),- (The same) who whispers into the hearts of Mankind,- Among Jinns and among men.',
+                reference: 'سورة الناس',
+                count: 3,
+                benefits: 'حماية من وسوسة الشيطان والجن والإنس أثناء النوم'
+            },
+            {
+                id: 'sleep_8',
+                arabic: 'اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ',
+                translation: 'O Allah, protect me from Your punishment on the Day You resurrect Your servants.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'دعاء للنجاة من عذاب يوم القيامة'
+            },
+            {
+                id: 'sleep_9',
+                arabic: 'اللَّهُمَّ بِاسْمِكَ أَحْيَا وَأَمُوتُ',
+                translation: 'O Allah, in Your name I live and I die.',
+                reference: 'صحيح البخاري',
+                count: 1,
+                benefits: 'تفويض الحياة والموت لله سبحانه وتعالى'
+            },
+            {
+                id: 'sleep_10',
+                arabic: 'أَسْتَغْفِرُ اللَّهَ الَّذِي لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+                translation: 'I seek forgiveness from Allah, besides whom there is no god, the Ever-Living, the Sustainer, and I repent to Him.',
+                reference: 'سنن أبي داود',
+                count: 3,
+                benefits: 'استغفار عظيم يمحو الذنوب قبل النوم'
+            }
+        ],
+        prayer: [
+            {
+                id: 'prayer_1',
+                arabic: 'أَسْتَغْفِرُ اللَّهَ',
+                translation: 'I seek forgiveness from Allah',
+                reference: 'صحيح مسلم',
+                count: 3,
+                benefits: 'الاستغفار يمحو الذنوب ويفتح أبواب الرزق'
+            },
+            {
+                id: 'prayer_2',
+                arabic: 'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ',
+                translation: 'O Allah, You are As-Salaam and from You is all peace, blessed are You, O Possessor of majesty and honor',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'دعاء مستجاب بعد الصلاة'
+            },
+            {
+                id: 'prayer_3',
+                arabic: 'لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent',
+                reference: 'صحيح البخاري',
+                count: 1,
+                benefits: 'توحيد الله وإثبات قدرته'
+            },
+            {
+                id: 'prayer_4',
+                arabic: 'سُبْحَانَ اللَّهِ',
+                translation: 'Glory be to Allah',
+                reference: 'صحيح مسلم',
+                count: 33,
+                benefits: 'تسبيح الله يرفع الدرجات'
+            },
+            {
+                id: 'prayer_5',
+                arabic: 'الْحَمْدُ لِلَّهِ',
+                translation: 'Praise be to Allah',
+                reference: 'صحيح مسلم',
+                count: 33,
+                benefits: 'حمد الله يملأ الميزان'
+            },
+            {
+                id: 'prayer_6',
+                arabic: 'اللَّهُ أَكْبَرُ',
+                translation: 'Allah is the Greatest',
+                reference: 'صحيح مسلم',
+                count: 34,
+                benefits: 'تكبير الله يعظم الأجر'
+            },
+            {
+                id: 'prayer_7',
+                arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+                translation: 'Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.',
+                reference: 'آية الكرسي - سورة البقرة آية 255',
+                count: 1,
+                benefits: 'من قرأها بعد كل صلاة لم يمنعه من دخول الجنة إلا الموت'
+            },
+            {
+                id: 'prayer_8',
+                arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ * قُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+                translation: 'In the name of Allah, the Beneficent, the Merciful. Say: He is Allah, the One! Allah, the Eternal, Absolute; He begets not, nor is He begotten; And there is none like unto Him.',
+                reference: 'سورة الإخلاص',
+                count: 1,
+                benefits: 'تعدل ثلث القرآن وتحصن المؤمن'
+            },
+            {
+                id: 'prayer_9',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+                translation: 'Say: I seek refuge with the Lord of the Dawn, From the mischief of created things; From the mischief of Darkness as it overspreads; From the mischief of those who practice secret arts; And from the mischief of the envious one as he practices envy.',
+                reference: 'سورة الفلق',
+                count: 1,
+                benefits: 'حماية من الشرور والحسد والسحر'
+            },
+            {
+                id: 'prayer_10',
+                arabic: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَٰهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ',
+                translation: 'Say: I seek refuge with the Lord and Cherisher of Mankind, The King (or Ruler) of Mankind, The Allah (for judge) of Mankind,- From the mischief of the Whisperer (of Evil), who withdraws (after his whisper),- (The same) who whispers into the hearts of Mankind,- Among Jinns and among men.',
+                reference: 'سورة الناس',
+                count: 1,
+                benefits: 'حماية من وسوسة الشيطان والجن والإنس'
+            },
+            {
+                id: 'prayer_11',
+                arabic: 'اللَّهُمَّ أَعِنِّي عَلَىٰ ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ',
+                translation: 'O Allah, help me to remember You, to thank You, and to worship You in the best manner.',
+                reference: 'سنن أبي داود',
+                count: 1,
+                benefits: 'دعاء لطلب العون على الذكر والشكر وحسن العبادة'
+            },
+            {
+                id: 'prayer_12',
+                arabic: 'اللَّهُمَّ اغْفِرْ لِي ذَنْبِي، وَوَسِّعْ لِي فِي دَارِي، وَبَارِكْ لِي فِي رِزْقِي',
+                translation: 'O Allah, forgive my sins, expand my home for me, and bless my sustenance.',
+                reference: 'مسند أحمد',
+                count: 1,
+                benefits: 'دعاء جامع للمغفرة وسعة الرزق والمسكن'
+            }
+        ],
+        general: [
+            {
+                id: 'general_1',
+                arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+                translation: 'Glory be to Allah and praise Him',
+                reference: 'صحيح البخاري',
+                count: 100,
+                benefits: 'من قالها مائة مرة حُطت خطاياه وإن كانت مثل زبد البحر'
+            },
+            {
+                id: 'general_2',
+                arabic: 'لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent',
+                reference: 'صحيح البخاري',
+                count: 10,
+                benefits: 'من قالها عشر مرات كانت له كعدل أربع رقاب'
+            },
+            {
+                id: 'general_3',
+                arabic: 'سُبْحَانَ اللَّهِ الْعَظِيمِ وَبِحَمْدِهِ',
+                translation: 'Glory be to Allah, the Magnificent, and praise Him',
+                reference: 'صحيح مسلم',
+                count: 10,
+                benefits: 'غُرست له نخلة في الجنة'
+            },
+            {
+                id: 'general_4',
+                arabic: 'أَسْتَغْفِرُ اللَّهَ الَّذِي لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+                translation: 'I seek forgiveness from Allah, there is no deity except Him, the Ever-Living, the Sustainer, and I repent to Him',
+                reference: 'سنن الترمذي',
+                count: 100,
+                benefits: 'غُفر له ذنبه وإن كان فارّاً من الزحف'
+            },
+            {
+                id: 'general_5',
+                arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+                translation: 'There is no power and no strength except with Allah',
+                reference: 'صحيح البخاري',
+                count: 100,
+                benefits: 'كنز من كنوز الجنة ودواء من تسعة وتسعين داء أيسرها الهم'
+            },
+            {
+                id: 'general_6',
+                arabic: 'اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَىٰ نَبِيِّنَا مُحَمَّدٍ',
+                translation: 'O Allah, send prayers and peace upon our Prophet Muhammad',
+                reference: 'سنن أبي داود',
+                count: 100,
+                benefits: 'من صلى علي واحدة صلى الله عليه عشراً'
+            },
+            {
+                id: 'general_7',
+                arabic: 'سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَٰهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ',
+                translation: 'Glory be to Allah, praise be to Allah, there is no god but Allah, and Allah is the Greatest',
+                reference: 'سنن الترمذي',
+                count: 25,
+                benefits: 'أحب الكلام إلى الله وأفضله'
+            },
+            {
+                id: 'general_8',
+                arabic: 'رَبِّ اغْفِرْ لِي ذَنْبِي وَخَطَئِي وَجَهْلِي',
+                translation: 'My Lord, forgive me my sins, my mistakes, and my ignorance',
+                reference: 'صحيح البخاري',
+                count: 100,
+                benefits: 'دعاء شامل لطلب المغفرة من جميع الذنوب'
+            },
+            {
+                id: 'general_9',
+                arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنَ الْخَيْرِ كُلِّهِ عَاجِلِهِ وَآجِلِهِ، مَا عَلِمْتُ مِنْهُ وَمَا لَمْ أَعْلَمْ',
+                translation: 'O Allah, I ask You for all that is good, in this world and in the Hereafter, what I know of it and what I do not know',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'دعاء جامع لطلب كل خير في الدنيا والآخرة'
+            },
+            {
+                id: 'general_10',
+                arabic: 'اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي',
+                translation: 'O Allah, rectify for me my religion which is the safeguard of my affairs. And rectify for me my worldly affairs wherein is my livelihood. And rectify for me my Hereafter wherein is my return',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'دعاء شامل لإصلاح الدين والدنيا والآخرة'
+            },
+            {
+                id: 'general_11',
+                arabic: 'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ',
+                translation: 'O Ever-Living, O Self-Existing, by Your mercy I seek help',
+                reference: 'سنن الترمذي',
+                count: 3,
+                benefits: 'دعاء عظيم للاستغاثة برحمة الله'
+            },
+            {
+                id: 'general_12',
+                arabic: 'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ، وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
+                translation: 'Allah is sufficient for me. There is no god but Him. I have placed my trust in Him, and He is Lord of the Mighty Throne',
+                reference: 'سنن أبي داود',
+                count: 7,
+                benefits: 'من قالها سبع مرات كفاه الله ما أهمه'
+            }
+        ],
+        travel: [
+            {
+                id: 'travel_1',
+                arabic: 'سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ * وَإِنَّا إِلَىٰ رَبِّنَا لَمُنقَلِبُونَ',
+                translation: 'Glory be to Him who has subjected this to us, and we could never have it (by our efforts). And verily, to our Lord we indeed are to return!',
+                reference: 'سورة الزخرف آية 13-14',
+                count: 1,
+                benefits: 'دعاء ركوب المواصلات والسفر'
+            },
+            {
+                id: 'travel_2',
+                arabic: 'اللَّهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَٰذَا الْبِرَّ وَالتَّقْوَىٰ، وَمِنَ الْعَمَلِ مَا تَرْضَىٰ، اللَّهُمَّ هَوِّنْ عَلَيْنَا سَفَرَنَا هَٰذَا وَاطْوِ عَنَّا بُعْدَهُ',
+                translation: 'O Allah, we ask You on this journey for righteousness, piety, and such deeds as are pleasing to You. O Allah, make this journey easy for us and shorten its distance for us.',
+                reference: 'سنن الترمذي',
+                count: 1,
+                benefits: 'دعاء السفر لطلب البر والتقوى وتيسير الطريق'
+            },
+            {
+                id: 'travel_3',
+                arabic: 'اللَّهُمَّ أَنْتَ الصَّاحِبُ فِي السَّفَرِ، وَالْخَلِيفَةُ فِي الْأَهْلِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ وَعْثَاءِ السَّفَرِ، وَكَآبَةِ الْمَنْظَرِ، وَسُوءِ الْمُنْقَلَبِ فِي الْمَالِ وَالْأَهْلِ',
+                translation: 'O Allah, You are the Companion on the journey and the Successor over the family. O Allah, I seek refuge with You from the difficulties of travel, from having a change of heart and from being in a bad predicament, and I seek refuge from an ill-fated outcome with wealth and family.',
+                reference: 'صحيح مسلم',
+                count: 1,
+                benefits: 'دعاء شامل لحفظ المسافر وأهله'
+            },
+            {
+                id: 'travel_4',
+                arabic: 'اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ، وَإِنَّا إِلَىٰ رَبِّنَا لَمُنقَلِبُونَ',
+                translation: 'Allah is Most Great, Allah is Most Great, Allah is Most Great. Glory be to Him who has subjected this to us, and we could never have it (by our efforts). And verily, to our Lord we indeed are to return!',
+                reference: 'سنن أبي داود',
+                count: 1,
+                benefits: 'تكبير وتسبيح عند بداية السفر'
+            },
+            {
+                id: 'travel_5',
+                arabic: 'اللَّهُمَّ بَلِّغْنَا مَقْصِدَنَا فِي أَحْسَنِ حَالٍ وَأَعْظَمِ أَمَانٍ، وَارْزُقْنَا مِنْ فَضْلِكَ وَعَافِيَتِكَ وَاجْعَلْنَا شَاكِرِينَ لِنِعْمَتِكَ',
+                translation: 'O Allah, convey us to our destination in the best condition and with the greatest security. Grant us from Your bounty and well-being, and make us grateful for Your blessings.',
+                reference: 'دعاء مأثور',
+                count: 1,
+                benefits: 'دعاء لتحقيق الغرض من السفر بأمان'
+            },
+            {
+                id: 'travel_6',
+                arabic: 'آيِبُونَ تَائِبُونَ عَابِدُونَ لِرَبِّنَا حَامِدُونَ',
+                translation: 'We are returning, repenting, worshipping and praising our Lord.',
+                reference: 'صحيح البخاري',
+                count: 1,
+                benefits: 'دعاء الإياب من السفر'
+            },
+            {
+                id: 'travel_7',
+                arabic: 'لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+                translation: 'None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise and He is over all things omnipotent.',
+                reference: 'صحيح البخاري',
+                count: 1,
+                benefits: 'توحيد الله أثناء السفر'
+            },
+            {
+                id: 'travel_8',
+                arabic: 'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
+                translation: 'I seek refuge in the perfect words of Allah from the evil of what He has created.',
+                reference: 'صحيح مسلم',
+                count: 3,
+                benefits: 'حماية من كل شر أثناء السفر'
+            },
+            {
+                id: 'travel_9',
+                arabic: 'اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ، وَمِنْ خَلْفِي، وَعَنْ يَمِينِي، وَعَنْ شِمَالِي، وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي',
+                translation: 'O Allah, guard me from in front of me and behind me, from my right and from my left, and from above me. I seek refuge in Your Greatness lest I be struck down from beneath me.',
+                reference: 'سنن أبي داود',
+                count: 1,
+                benefits: 'حماية شاملة من كل الجهات'
+            },
+            {
+                id: 'travel_10',
+                arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ وَرَحْمَتِكَ، فَإِنَّهُ لَا يَمْلِكُهَا إِلَّا أَنْتَ',
+                translation: 'O Allah, I ask You for Your favor and mercy, for no one possesses them except You.',
+                reference: 'سنن الترمذي',
+                count: 1,
+                benefits: 'طلب فضل الله ورحمته في السفر'
+            }
+        ]
+    };
+
+    // Check if it's a new day
+    const today = new Date().toDateString();
+    if (appState.lastDate !== today) {
+        appState.todayCount = 0;
+        appState.lastDate = today;
+        localStorage.setItem('azkarTodayCount', '0');
+        localStorage.setItem('azkarLastDate', today);
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStats();
+        showMorningAzkar();
+    });
+
+    // Refresh statistics from server
+    async function refreshStats() {
+        if (!window.isAuthenticated) return;
+        
+        try {
+            const response = await fetch('/api/azkar/statistics');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    updateStatsDisplay(data.statistics);
+                }
+            }
+        } catch (error) {
+            console.warn('Error loading statistics:', error);
+        }
+    }
+
+    // Update statistics display
+    function updateStatsDisplay(stats) {
+        if (!window.isAuthenticated) return;
+        
+        const elements = {
+            todayDhikrCount: document.getElementById('todayDhikrCount'),
+            completedAzkar: document.getElementById('completedAzkar'),
+            completionRate: document.getElementById('completionRate'),
+            currentStreak: document.getElementById('currentStreak')
+        };
+
+        if (stats && stats.today) {
+            if (elements.todayDhikrCount) elements.todayDhikrCount.textContent = stats.today.total_dhikr || 0;
+            if (elements.completedAzkar) elements.completedAzkar.textContent = stats.today.completed_azkar || 0;
+            if (elements.completionRate) elements.completionRate.textContent = (stats.today.completion_rate || 0) + '%';
+            if (elements.currentStreak) elements.currentStreak.textContent = (stats.streak ? stats.streak.current_streak : 0) || 0;
+        }
+    }
+
+    // Switch between tabs
+    function switchTab(tabName) {
+        // Update active tab
+        document.querySelectorAll('.time-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-time="${tabName}"]`).classList.add('active');
+        
+        appState.currentTab = tabName;
+        displayAzkar(azkarData[tabName]);
+    }
+
+    // Quick access functions
+    function showMorningAzkar() {
+        switchTab('morning');
+    }
+
+    function showEveningAzkar() {
+        switchTab('evening');
+    }
+
+    function showSleepAzkar() {
+        switchTab('sleep');
+    }
+
+    function showGeneralAzkar() {
+        switchTab('general');
+    }
+
+    function showPrayerAzkar() {
+        switchTab('prayer');
+    }
+
+    function showTravelAzkar() {
+        // Show travel azkar
+        displayAzkar(azkarData.travel);
+        appState.currentTab = 'travel';
+        updateTabSelection('travel');
+        showNotification('✈️ أذكار السفر جاهزة للاستخدام');
+    }
+
+    // Display azkar for current tab
+    function displayAzkar(azkarList) {
+        const display = document.getElementById('azkarDisplay');
+        let html = '';
+
+        azkarList.forEach((zikr, index) => {
+            const currentCount = appState.counters[zikr.id] || 0;
+            const targetCount = typeof zikr.count === 'string' ? 1 : zikr.count;
+            const progress = Math.min((currentCount / targetCount) * 100, 100);
+            const isCompleted = currentCount >= targetCount;
+
+            html += `
+                <div class="azkar-card ${isCompleted ? 'pulse' : ''}">
+                    <div class="category-badge">${getCategoryName(appState.currentTab)}</div>
+                    
+                    <div class="azkar-arabic">${zikr.arabic}</div>
+                    
+                    <div class="azkar-translation">${zikr.translation}</div>
+                    
+                    <div class="azkar-reference">📖 ${zikr.reference}</div>
+                    
+                    <div class="azkar-count">
+                        <div class="count-badge">العدد المطلوب: ${zikr.count}</div>
+                    </div>
+                    
+                    <div class="counter-section">
+                        <button class="counter-btn" onclick="decrementCounter('${zikr.id}')">-</button>
+                        <div class="counter-display" id="counter_${zikr.id}">${currentCount}</div>
+                        <button class="counter-btn" onclick="incrementCounter('${zikr.id}', ${targetCount})">+</button>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-label">التقدم: ${currentCount} من ${targetCount}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="progress-text">${Math.round(progress)}% مكتمل</div>
+                    </div>
+                    
+                    <div class="azkar-benefits">
+                        <div class="benefits-title">🌟 الفائدة:</div>
+                        <div class="benefits-text">${zikr.benefits}</div>
+                    </div>
+                    
+                    <div class="azkar-actions">
+                        <button class="action-btn" onclick="resetCounter('${zikr.id}')">
+                            <i class="fas fa-undo"></i> إعادة تعيين
+                        </button>
+                        <button class="action-btn" onclick="copyZikr('${zikr.arabic}')">
+                            <i class="fas fa-copy"></i> نسخ
+                        </button>
+                        <button class="action-btn primary" onclick="completeZikr('${zikr.id}', ${targetCount})">
+                            <i class="fas fa-check"></i> إكمال العدد
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        display.innerHTML = html;
+    }
+
+    // Increment counter
+    function incrementCounter(zikrId, targetCount) {
+        if (!appState.counters[zikrId]) {
+            appState.counters[zikrId] = 0;
+        }
+        
+        if (appState.counters[zikrId] < targetCount) {
+            appState.counters[zikrId]++;
+            appState.todayCount++;
+            
+            updateCounterDisplay(zikrId);
+            updateStats();
+            saveState();
+            
+            // Save to server for authenticated users
+            saveProgressToServer(zikrId, appState.counters[zikrId], targetCount);
+            
+            // Check if completed
+            if (appState.counters[zikrId] === targetCount) {
+                showNotification('🎉 مبارك! تم إكمال هذا الذكر');
+                appState.completedSets++;
+                
+                // Check for achievements
+                checkAchievements();
+                
+                updateStats();
+            }
+        }
+    }
+
+    // Decrement counter
+    function decrementCounter(zikrId) {
+        if (appState.counters[zikrId] && appState.counters[zikrId] > 0) {
+            appState.counters[zikrId]--;
+            if (appState.todayCount > 0) {
+                appState.todayCount--;
+            }
+            
+            updateCounterDisplay(zikrId);
+            updateStats();
+            saveState();
+        }
+    }
+
+    // Reset counter
+    function resetCounter(zikrId) {
+        if (appState.counters[zikrId]) {
+            appState.todayCount -= appState.counters[zikrId];
+            appState.counters[zikrId] = 0;
+            
+            updateCounterDisplay(zikrId);
+            updateStats();
+            saveState();
+            showNotification('تم إعادة تعيين العداد');
+        }
+    }
+
+    // Check for achievements and milestones
+    function checkAchievements() {
+        const milestones = {
+            completedSets: [5, 10, 25, 50, 100],
+            todayCount: [50, 100, 200, 500, 1000],
+            streak: [3, 7, 15, 30, 100]
+        };
+
+        // Check completed sets milestones
+        if (milestones.completedSets.includes(appState.completedSets)) {
+            if (window.islamicNotifications) {
+                window.islamicNotifications.showAchievement(
+                    'إنجاز رائع!',
+                    `تم إكمال ${appState.completedSets} مجموعة من الأذكار! 🎊`
+                );
+            }
+        }
+
+        // Check daily count milestones
+        if (milestones.todayCount.includes(appState.todayCount)) {
+            if (window.islamicNotifications) {
+                window.islamicNotifications.showAchievement(
+                    'مبارك!',
+                    `وصلت إلى ${appState.todayCount} تسبيحة اليوم! ⭐`
+                );
+            }
+        }
+
+        // Check streak milestones
+        if (milestones.streak.includes(appState.currentStreak)) {
+            if (window.islamicNotifications) {
+                window.islamicNotifications.showStreakNotification(appState.currentStreak);
+            }
+        }
+
+        // Special achievement for completing all morning/evening azkar
+        checkSpecialAchievements();
+    }
+
+    // Check special achievements
+    function checkSpecialAchievements() {
+        const currentData = azkarData[appState.currentTab];
+        if (!currentData) return;
+
+        let allCompleted = true;
+        for (const zikr of currentData) {
+            if ((appState.counters[zikr.id] || 0) < zikr.count) {
+                allCompleted = false;
+                break;
+            }
+        }
+
+        if (allCompleted) {
+            const categoryNames = {
+                'morning': 'أذكار الصباح',
+                'evening': 'أذكار المساء',
+                'sleep': 'أذكار النوم',
+                'prayer': 'أذكار الصلاة',
+                'general': 'الأذكار العامة',
+                'travel': 'أذكار السفر'
+            };
+
+            const categoryName = categoryNames[appState.currentTab] || 'الأذكار';
+            
+            if (window.islamicNotifications) {
+                window.islamicNotifications.showAchievement(
+                    'إنجاز كامل! 🏆',
+                    `تم إكمال جميع ${categoryName} لهذا اليوم!`
+                );
+            }
+        }
+    }
+
+    // Complete zikr (set to target count)
+    function completeZikr(zikrId, targetCount) {
+        const currentCount = appState.counters[zikrId] || 0;
+        const remaining = targetCount - currentCount;
+        
+        if (remaining > 0) {
+            appState.counters[zikrId] = targetCount;
+            appState.todayCount += remaining;
+            
+            updateCounterDisplay(zikrId);
+            updateStats();
+            saveState();
+            
+            // Save to server for authenticated users
+            saveProgressToServer(zikrId, targetCount, targetCount);
+            
+            showNotification('🎉 تم إكمال الذكر بالكامل!');
+            appState.completedSets++;
+            updateStats();
+        }
+    }
+
+    // Update counter display
+    function updateCounterDisplay(zikrId) {
+        const counterElement = document.getElementById(`counter_${zikrId}`);
+        if (counterElement) {
+            counterElement.textContent = appState.counters[zikrId] || 0;
+        }
+        
+        // Refresh the current view to update progress bars
+        displayAzkar(azkarData[appState.currentTab]);
+    }
+
+    // Copy zikr text
+    function copyZikr(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showNotification('تم نسخ الذكر');
+        }).catch(err => {
+            showNotification('فشل في النسخ');
+        });
+    }
+
+    // Get category name in Arabic
+    function getCategoryName(category) {
+        const names = {
+            'morning': 'أذكار الصباح',
+            'evening': 'أذكار المساء',
+            'sleep': 'أذكار النوم',
+            'prayer': 'أذكار الصلاة',
+            'general': 'أذكار عامة'
+        };
+        return names[category] || 'أذكار';
+    }
+
+    // Save state to localStorage
+    function saveState() {
+        localStorage.setItem('azkarTodayCount', appState.todayCount.toString());
+        localStorage.setItem('azkarCompletedSets', appState.completedSets.toString());
+        localStorage.setItem('azkarStreak', appState.currentStreak.toString());
+        localStorage.setItem('azkarCounters', JSON.stringify(appState.counters));
+        localStorage.setItem('azkarLastDate', appState.lastDate);
+    }
+
+    // Save progress to server (for authenticated users)
+    async function saveProgressToServer(azkarId, count, targetCount) {
+        if (!window.isAuthenticated) return;
+        
+        try {
+            const response = await fetch('/api/azkar/progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    azkar_id: azkarId,
+                    count: count,
+                    target_count: targetCount
+                })
+            });
+            
+            if (!response.ok) {
+                console.warn('Failed to save progress to server');
+            }
+        } catch (error) {
+            console.warn('Error saving progress to server:', error);
+        }
+    }
+
+    // Load progress from server (for authenticated users)
+    async function loadProgressFromServer() {
+        if (!window.isAuthenticated) return;
+        
+        try {
+            const response = await fetch('/api/azkar/progress');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.progress) {
+                    // Merge server progress with local state
+                    Object.keys(data.progress).forEach(azkarId => {
+                        const serverCount = data.progress[azkarId].count;
+                        const localCount = appState.counters[azkarId] || 0;
+                        // Use the higher count between server and local
+                        appState.counters[azkarId] = Math.max(serverCount, localCount);
+                    });
+                    
+                    // Update displays
+                    displayAzkar(azkarData[appState.currentTab]);
+                    updateStats();
+                }
+            }
+        } catch (error) {
+            console.warn('Error loading progress from server:', error);
+        }
+    }
+
+    // Show notification
+    function showNotification(message) {
+        // Remove existing notification
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create new notification
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    // Initialize with morning azkar
+    showMorningAzkar();
+    
+    // Load server progress for authenticated users
+    loadProgressFromServer();
+</script>
+{% endblock %}

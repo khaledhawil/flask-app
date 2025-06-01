@@ -1,0 +1,618 @@
+{% extends "base.html" %}
+
+{% block title %}إعدادات الصوت والإشعارات{% endblock %}
+
+{% block styles %}
+<style>
+    .audio-settings-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--card-bg);
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .settings-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .settings-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .settings-section {
+        background: var(--bg-color);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-label {
+        font-weight: 500;
+        color: var(--text-color);
+    }
+
+    .setting-description {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    .setting-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 26px;
+        background: var(--border-color);
+        border-radius: 13px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .toggle-switch.active {
+        background: var(--primary-color);
+    }
+
+    .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 0.3s;
+    }
+
+    .toggle-switch.active::after {
+        transform: translateX(-24px);
+    }
+
+    .volume-slider {
+        width: 120px;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border-color);
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .test-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .test-button:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+    }
+
+    .time-input {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--bg-color);
+        color: var(--text-color);
+        width: 80px;
+    }
+
+    .quiet-hours {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .status-enabled {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .status-disabled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .save-button {
+        background: var(--success-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 1rem;
+        transition: all 0.3s;
+    }
+
+    .save-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    }
+
+    .reset-button {
+        background: var(--warning-color);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        width: 100%;
+        transition: all 0.3s;
+    }
+
+    .audio-preview {
+        background: var(--bg-color);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .preview-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--card-bg);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .preview-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="audio-settings-container">
+    <div class="settings-header">
+        <h1>🔊 إعدادات الصوت والإشعارات</h1>
+        <p>تخصيص أصوات الإشعارات الإسلامية</p>
+    </div>
+
+    <!-- إعدادات عامة -->
+    <div class="settings-section">
+        <h2 class="section-title">
+            <i class="fas fa-volume-up"></i>
+            الإعدادات العامة
+        </h2>
+        
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">تفعيل الأصوات</div>
+                <div class="setting-description">تشغيل/إيقاف جميع الأصوات</div>
+            </div>
+            <div class="setting-control">
+                <span class="status-indicator" id="audioStatus">
+                    <i class="fas fa-circle"></i>
+                    مفعل
+                </span>
+                <div class="toggle-switch active" id="audioToggle"></div>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">مستوى الصوت</div>
+                <div class="setting-description">التحكم في مستوى صوت الإشعارات</div>
+            </div>
+            <div class="setting-control">
+                <span id="volumeValue">70%</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">الوضع الصامت</div>
+                <div class="setting-description">تحديد أوقات الهدوء (يتم استبدال الأصوات بالاهتزاز)</div>
+            </div>
+            <div class="setting-control quiet-hours">
+                <span>من</span>
+                <input type="time" class="time-input" id="quietStart" value="23:00">
+                <span>إلى</span>
+                <input type="time" class="time-input" id="quietEnd" value="06:00">
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">الاهتزاز</div>
+                <div class="setting-description">تفعيل الاهتزاز مع الأصوات (للأجهزة المدعومة)</div>
+            </div>
+            <div class="setting-control">
+                <div class="toggle-switch active" id="vibrationToggle"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- إعدادات أصوات الصلاة -->
+    <div class="settings-section">
+        <h2 class="section-title">
+            <i class="fas fa-mosque"></i>
+            أصوات إشعارات الصلاة
+        </h2>
+        
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">صوت أذان الفجر</div>
+                <div class="setting-description">صوت خاص لأذان الفجر</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('prayer', 'fajr')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">صوت الأذان العادي</div>
+                <div class="setting-description">للصلوات الأخرى (الظهر، العصر، المغرب، العشاء)</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('prayer', 'dhuhr')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- إعدادات أصوات الأذكار -->
+    <div class="settings-section">
+        <h2 class="section-title">
+            <i class="fas fa-hands-praying"></i>
+            أصوات إشعارات الأذكار
+        </h2>
+        
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">أذكار الصباح</div>
+                <div class="setting-description">صوت تذكير أذكار الصباح</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('azkar', 'morning')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">أذكار المساء</div>
+                <div class="setting-description">صوت تذكير أذكار المساء</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('azkar', 'evening')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">أذكار النوم</div>
+                <div class="setting-description">صوت تذكير أذكار النوم</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('azkar', 'sleep')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">الاستغفار والأذكار العامة</div>
+                <div class="setting-description">صوت تذكيرات الذكر العامة</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('azkar', 'general')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- إعدادات أصوات أخرى -->
+    <div class="settings-section">
+        <h2 class="section-title">
+            <i class="fas fa-book-quran"></i>
+            أصوات أخرى
+        </h2>
+        
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">تذكير قراءة القرآن</div>
+                <div class="setting-description">صوت تذكير قراءة القرآن اليومية</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('quran')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">صوت التسبيح</div>
+                <div class="setting-description">صوت عند الضغط على التسبيح</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('tasbeh')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">الإشعارات العامة</div>
+                <div class="setting-description">صوت الإشعارات العامة والإنجازات</div>
+            </div>
+            <div class="setting-control">
+                <button class="test-button" onclick="testSound('general')">
+                    <i class="fas fa-play"></i> تجربة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- معاينة الأصوات -->
+    <div class="audio-preview">
+        <h3>🎵 معاينة الأصوات</h3>
+        <p>اضغط على الأزرار أدناه لتجربة الأصوات المختلفة:</p>
+        
+        <div class="preview-grid">
+            <div class="preview-item">
+                <div class="preview-icon">🌅</div>
+                <h4>أذان الفجر</h4>
+                <button class="test-button" onclick="testSound('prayer', 'fajr')">تجربة</button>
+            </div>
+            <div class="preview-item">
+                <div class="preview-icon">🕌</div>
+                <h4>الأذان العادي</h4>
+                <button class="test-button" onclick="testSound('prayer', 'dhuhr')">تجربة</button>
+            </div>
+            <div class="preview-item">
+                <div class="preview-icon">☀️</div>
+                <h4>أذكار الصباح</h4>
+                <button class="test-button" onclick="testSound('azkar', 'morning')">تجربة</button>
+            </div>
+            <div class="preview-item">
+                <div class="preview-icon">🌄</div>
+                <h4>أذكار المساء</h4>
+                <button class="test-button" onclick="testSound('azkar', 'evening')">تجربة</button>
+            </div>
+            <div class="preview-item">
+                <div class="preview-icon">📖</div>
+                <h4>تذكير القرآن</h4>
+                <button class="test-button" onclick="testSound('quran')">تجربة</button>
+            </div>
+            <div class="preview-item">
+                <div class="preview-icon">📿</div>
+                <h4>صوت التسبيح</h4>
+                <button class="test-button" onclick="testSound('tasbeh')">تجربة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- أزرار الحفظ والإعادة تعيين -->
+    <button class="save-button" onclick="saveAudioSettings()">
+        <i class="fas fa-save"></i> حفظ الإعدادات
+    </button>
+    
+    <button class="reset-button" onclick="resetToDefaults()">
+        <i class="fas fa-undo"></i> إعادة تعيين الإعدادات الافتراضية
+    </button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadAudioSettings();
+    setupEventListeners();
+});
+
+function loadAudioSettings() {
+    if (window.audioManager) {
+        const settings = window.audioManager.getSettings();
+        
+        // تحديث واجهة المستخدم بالإعدادات المحفوظة
+        document.getElementById('audioToggle').classList.toggle('active', settings.enabled);
+        document.getElementById('volumeSlider').value = Math.round(settings.volume * 100);
+        document.getElementById('volumeValue').textContent = Math.round(settings.volume * 100) + '%';
+        document.getElementById('quietStart').value = settings.muteAt.start;
+        document.getElementById('quietEnd').value = settings.muteAt.end;
+        document.getElementById('vibrationToggle').classList.toggle('active', settings.useVibration);
+        
+        updateAudioStatus(settings.enabled);
+    }
+}
+
+function setupEventListeners() {
+    // تبديل تفعيل الصوت
+    document.getElementById('audioToggle').addEventListener('click', function() {
+        this.classList.toggle('active');
+        const enabled = this.classList.contains('active');
+        updateAudioStatus(enabled);
+        
+        if (window.audioManager) {
+            window.audioManager.updateSettings({ enabled });
+        }
+    });
+
+    // تحديث مستوى الصوت
+    document.getElementById('volumeSlider').addEventListener('input', function() {
+        const volume = this.value / 100;
+        document.getElementById('volumeValue').textContent = this.value + '%';
+        
+        if (window.audioManager) {
+            window.audioManager.updateSettings({ volume });
+        }
+    });
+
+    // تحديث أوقات الهدوء
+    document.getElementById('quietStart').addEventListener('change', function() {
+        updateQuietHours();
+    });
+    
+    document.getElementById('quietEnd').addEventListener('change', function() {
+        updateQuietHours();
+    });
+
+    // تبديل الاهتزاز
+    document.getElementById('vibrationToggle').addEventListener('click', function() {
+        this.classList.toggle('active');
+        const useVibration = this.classList.contains('active');
+        
+        if (window.audioManager) {
+            window.audioManager.updateSettings({ useVibration });
+        }
+    });
+}
+
+function updateAudioStatus(enabled) {
+    const statusElement = document.getElementById('audioStatus');
+    if (enabled) {
+        statusElement.className = 'status-indicator status-enabled';
+        statusElement.innerHTML = '<i class="fas fa-circle"></i> مفعل';
+    } else {
+        statusElement.className = 'status-indicator status-disabled';
+        statusElement.innerHTML = '<i class="fas fa-circle"></i> معطل';
+    }
+}
+
+function updateQuietHours() {
+    const start = document.getElementById('quietStart').value;
+    const end = document.getElementById('quietEnd').value;
+    
+    if (window.audioManager) {
+        window.audioManager.updateSettings({
+            muteAt: { start, end }
+        });
+    }
+}
+
+async function testSound(type, subType) {
+    if (!window.audioManager) {
+        alert('مدير الصوت غير متاح');
+        return;
+    }
+
+    try {
+        switch(type) {
+            case 'prayer':
+                await window.audioManager.testPrayerSound(subType);
+                break;
+            case 'azkar':
+                await window.audioManager.testAzkarSound(subType);
+                break;
+            case 'quran':
+                await window.audioManager.playQuranSound();
+                break;
+            case 'tasbeh':
+                await window.audioManager.playTasbehSound();
+                break;
+            case 'general':
+                await window.audioManager.playGeneralNotification();
+                break;
+        }
+    } catch (error) {
+        console.error('خطأ في تشغيل الصوت:', error);
+        alert('حدث خطأ في تشغيل الصوت. تأكد من تمكين الأصوات في المتصفح.');
+    }
+}
+
+function saveAudioSettings() {
+    if (window.audioManager) {
+        // الإعدادات محفوظة تلقائياً عند التغيير
+        alert('تم حفظ الإعدادات بنجاح! ✅');
+    } else {
+        alert('خطأ: مدير الصوت غير متاح');
+    }
+}
+
+function resetToDefaults() {
+    if (confirm('هل أنت متأكد من إعادة تعيين جميع إعدادات الصوت إلى الافتراضية؟')) {
+        const defaultSettings = {
+            enabled: true,
+            volume: 0.7,
+            muteAt: { start: '23:00', end: '06:00' },
+            useVibration: true
+        };
+        
+        if (window.audioManager) {
+            window.audioManager.updateSettings(defaultSettings);
+            loadAudioSettings(); // إعادة تحميل الواجهة
+            alert('تم إعادة تعيين الإعدادات بنجاح! ✅');
+        }
+    }
+}
+</script>
+{% endblock %}

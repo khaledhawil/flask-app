@@ -1,0 +1,608 @@
+{% extends "base.html" %}
+
+{% block title %}تجربة التنبيهات{% endblock %}
+
+{% block extra_css %}
+<style>
+    .test-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        direction: rtl;
+    }
+
+    .test-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+
+    .test-section {
+        background: white;
+        margin: 20px 0;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-right: 4px solid #667eea;
+    }
+
+    .test-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin: 5px;
+        font-size: 14px;
+        transition: transform 0.2s;
+    }
+
+    .test-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .test-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .status-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-right: 3px solid #28a745;
+    }
+
+    .status-error {
+        border-right-color: #dc3545;
+        background: #fff5f5;
+    }
+
+    .status-warning {
+        border-right-color: #ffc107;
+        background: #fffbf0;
+    }
+
+    .permission-status {
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .stat-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .notification-log {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 12px;
+    }
+
+    .log-entry {
+        margin: 5px 0;
+        padding: 5px;
+        background: white;
+        border-radius: 4px;
+        border-right: 3px solid #007bff;
+    }
+
+    .prayer-times-card {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        color: #333;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    .prayer-time-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .prayer-time-item:last-child {
+        border-bottom: none;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .setting-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+        background-color: #667eea;
+    }
+
+    input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <div class="test-header">
+        <h1>🔔 تجربة واختبار التنبيهات الإسلامية</h1>
+        <p>استخدم هذه الصفحة لاختبار وتكوين النظام الكامل للتنبيهات</p>
+    </div>
+
+    <!-- Permission Status -->
+    <div class="test-section">
+        <h3>🔐 حالة الأذونات</h3>
+        <div id="permissionStatus" class="status-card">
+            <div class="permission-status">جاري فحص الأذونات...</div>
+        </div>
+        <button class="test-btn" onclick="requestPermission()">طلب إذن التنبيهات</button>
+    </div>
+
+    <!-- Quick Tests -->
+    <div class="test-section">
+        <h3>⚡ اختبارات سريعة</h3>
+        <button class="test-btn" onclick="testBasicNotification()">تجربة تنبيه أساسي</button>
+        <button class="test-btn" onclick="testAchievementNotification()">تجربة تنبيه إنجاز</button>
+        <button class="test-btn" onclick="testPrayerNotification()">تجربة تنبيه الصلاة</button>
+        <button class="test-btn" onclick="testWisdomNotification()">تجربة الحكمة الإسلامية</button>
+        <button class="test-btn" onclick="testStreakNotification()">تجربة تنبيه الإنجاز المتتالي</button>
+    </div>
+
+    <!-- Statistics -->
+    <div class="test-section">
+        <h3>📊 إحصائيات التنبيهات</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalScheduled">-</div>
+                <div>تنبيهات مجدولة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="enabledReminders">-</div>
+                <div>تذكيرات مفعلة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalReminders">-</div>
+                <div>إجمالي التذكيرات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="permissionLevel">-</div>
+                <div>مستوى الإذن</div>
+            </div>
+        </div>
+        <button class="test-btn" onclick="refreshStats()">تحديث الإحصائيات</button>
+    </div>
+
+    <!-- Prayer Times -->
+    <div class="test-section">
+        <h3>🕌 أوقات الصلاة المجدولة</h3>
+        <div class="prayer-times-card">
+            <div id="prayerTimesDisplay">جاري تحميل أوقات الصلاة...</div>
+        </div>
+        <button class="test-btn" onclick="refreshPrayerTimes()">تحديث أوقات الصلاة</button>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="test-section">
+        <h3>⚙️ إعدادات التنبيهات</h3>
+        <div class="settings-grid" id="settingsGrid">
+            <!-- Settings will be populated by JavaScript -->
+        </div>
+        <div style="margin-top: 20px;">
+            <button class="test-btn" onclick="enableAllNotifications()">تفعيل الكل</button>
+            <button class="test-btn" onclick="disableAllNotifications()">إيقاف الكل</button>
+        </div>
+    </div>
+
+    <!-- Notification Log -->
+    <div class="test-section">
+        <h3>📝 سجل التنبيهات</h3>
+        <div class="notification-log" id="notificationLog">
+            سيتم عرض سجل التنبيهات هنا...
+        </div>
+        <button class="test-btn" onclick="clearLog()">مسح السجل</button>
+    </div>
+
+    <!-- Advanced Controls -->
+    <div class="test-section">
+        <h3>🔧 تحكم متقدم</h3>
+        <button class="test-btn" onclick="scheduleTestReminders()">جدولة تذكيرات تجريبية</button>
+        <button class="test-btn" onclick="clearAllScheduled()">مسح جميع المجدولة</button>
+        <button class="test-btn" onclick="exportSettings()">تصدير الإعدادات</button>
+        <button class="test-btn" onclick="resetToDefaults()">إعادة تعيين الافتراضية</button>
+    </div>
+</div>
+
+<script>
+let notificationService;
+let notificationLog = [];
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', async function() {
+    if (window.islamicNotifications) {
+        notificationService = window.islamicNotifications;
+        updatePermissionStatus();
+        refreshStats();
+        loadNotificationSettings();
+        refreshPrayerTimes();
+        setupLogCapture();
+    } else {
+        logMessage('⚠️ خدمة التنبيهات غير متوفرة');
+    }
+});
+
+function updatePermissionStatus() {
+    const statusDiv = document.getElementById('permissionStatus');
+    const permission = Notification.permission;
+    
+    let statusClass = 'status-card';
+    let statusText = '';
+    
+    switch(permission) {
+        case 'granted':
+            statusClass += '';
+            statusText = '✅ تم منح إذن التنبيهات - يمكن عرض التنبيهات';
+            break;
+        case 'denied':
+            statusClass += ' status-error';
+            statusText = '❌ تم رفض إذن التنبيهات - يرجى تفعيلها من إعدادات المتصفح';
+            break;
+        case 'default':
+            statusClass += ' status-warning';
+            statusText = '⚠️ لم يتم طلب إذن التنبيهات بعد - انقر على "طلب إذن التنبيهات"';
+            break;
+    }
+    
+    statusDiv.className = statusClass;
+    statusDiv.innerHTML = `<div class="permission-status">${statusText}</div>`;
+}
+
+async function requestPermission() {
+    if (notificationService) {
+        const granted = await notificationService.requestPermission();
+        updatePermissionStatus();
+        if (granted) {
+            logMessage('✅ تم منح إذن التنبيهات بنجاح');
+            await notificationService.init();
+            refreshStats();
+        } else {
+            logMessage('❌ تم رفض إذن التنبيهات');
+        }
+    }
+}
+
+function testBasicNotification() {
+    if (notificationService) {
+        notificationService.testNotification();
+        logMessage('📱 تم إرسال تنبيه أساسي للاختبار');
+    }
+}
+
+function testAchievementNotification() {
+    if (notificationService) {
+        notificationService.showAchievement(
+            'اختبار الإنجاز',
+            'هذا اختبار لتنبيه الإنجازات! 🏆'
+        );
+        logMessage('🏆 تم إرسال تنبيه إنجاز للاختبار');
+    }
+}
+
+function testPrayerNotification() {
+    if (notificationService) {
+        notificationService.showNotification(
+            'حان وقت صلاة الظهر',
+            'وقت صلاة الظهر 🕌',
+            { url: '/prayer_times' }
+        );
+        logMessage('🕌 تم إرسال تنبيه صلاة للاختبار');
+    }
+}
+
+function testWisdomNotification() {
+    if (notificationService) {
+        notificationService.showIslamicWisdom();
+        logMessage('💝 تم إرسال تنبيه حكمة إسلامية للاختبار');
+    }
+}
+
+function testStreakNotification() {
+    if (notificationService) {
+        notificationService.showStreakNotification(7);
+        logMessage('🔥 تم إرسال تنبيه إنجاز متتالي للاختبار');
+    }
+}
+
+function refreshStats() {
+    if (notificationService) {
+        const stats = notificationService.getNotificationStats();
+        
+        document.getElementById('totalScheduled').textContent = stats.totalScheduled;
+        document.getElementById('enabledReminders').textContent = stats.remindersEnabled;
+        document.getElementById('totalReminders').textContent = stats.totalReminders;
+        document.getElementById('permissionLevel').textContent = stats.permissionStatus;
+        
+        logMessage(`📊 تم تحديث الإحصائيات: ${stats.remindersEnabled}/${stats.totalReminders} مفعل`);
+    }
+}
+
+async function refreshPrayerTimes() {
+    if (notificationService) {
+        try {
+            const prayerTimes = await notificationService.getPrayerTimes();
+            const display = document.getElementById('prayerTimesDisplay');
+            
+            if (prayerTimes) {
+                const formatTime = (date) => {
+                    return date.toLocaleTimeString('ar-SA', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: true 
+                    });
+                };
+                
+                display.innerHTML = `
+                    <div class="prayer-time-item">
+                        <span>🌅 الفجر:</span>
+                        <span>${formatTime(prayerTimes.fajr)}</span>
+                    </div>
+                    <div class="prayer-time-item">
+                        <span>☀️ الظهر:</span>
+                        <span>${formatTime(prayerTimes.dhuhr)}</span>
+                    </div>
+                    <div class="prayer-time-item">
+                        <span>🌆 العصر:</span>
+                        <span>${formatTime(prayerTimes.asr)}</span>
+                    </div>
+                    <div class="prayer-time-item">
+                        <span>🌅 المغرب:</span>
+                        <span>${formatTime(prayerTimes.maghrib)}</span>
+                    </div>
+                    <div class="prayer-time-item">
+                        <span>🌙 العشاء:</span>
+                        <span>${formatTime(prayerTimes.isha)}</span>
+                    </div>
+                `;
+                logMessage('🕌 تم تحديث أوقات الصلاة بنجاح');
+            } else {
+                display.textContent = 'تعذر الحصول على أوقات الصلاة';
+                logMessage('⚠️ تعذر الحصول على أوقات الصلاة');
+            }
+        } catch (error) {
+            logMessage(`❌ خطأ في تحديث أوقات الصلاة: ${error.message}`);
+        }
+    }
+}
+
+function loadNotificationSettings() {
+    if (notificationService) {
+        const settings = notificationService.getReminderSettings();
+        const settingsGrid = document.getElementById('settingsGrid');
+        
+        const settingNames = {
+            fajr: '🌅 تنبيه صلاة الفجر',
+            dhuhr: '☀️ تنبيه صلاة الظهر',
+            asr: '🌆 تنبيه صلاة العصر',
+            maghrib: '🌅 تنبيه صلاة المغرب',
+            isha: '🌙 تنبيه صلاة العشاء',
+            morning_azkar: '🌅 تنبيه أذكار الصباح',
+            evening_azkar: '🌄 تنبيه أذكار المساء',
+            sleep_azkar: '🌙 تنبيه أذكار النوم',
+            daily_quran: '📖 تنبيه قراءة القرآن',
+            istighfar: '🤲 تنبيه الاستغفار'
+        };
+        
+        settingsGrid.innerHTML = '';
+        
+        Object.entries(settings).forEach(([key, setting]) => {
+            const settingCard = document.createElement('div');
+            settingCard.className = 'setting-card';
+            settingCard.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold;">${settingNames[key]}</div>
+                        <div style="font-size: 12px; color: #666;">${setting.message}</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${setting.enabled ? 'checked' : ''} 
+                               onchange="toggleReminder('${key}', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            `;
+            settingsGrid.appendChild(settingCard);
+        });
+    }
+}
+
+function toggleReminder(reminderType, enabled) {
+    if (notificationService) {
+        notificationService.updateReminderSettings(reminderType, { enabled });
+        logMessage(`${enabled ? '✅' : '❌'} تم ${enabled ? 'تفعيل' : 'إيقاف'} تنبيه ${reminderType}`);
+        refreshStats();
+    }
+}
+
+function enableAllNotifications() {
+    if (notificationService) {
+        notificationService.enableAllNotifications();
+        loadNotificationSettings();
+        refreshStats();
+        logMessage('✅ تم تفعيل جميع التنبيهات');
+    }
+}
+
+function disableAllNotifications() {
+    if (notificationService) {
+        notificationService.disableAllNotifications();
+        loadNotificationSettings();
+        refreshStats();
+        logMessage('❌ تم إيقاف جميع التنبيهات');
+    }
+}
+
+function scheduleTestReminders() {
+    if (notificationService) {
+        // Schedule a test reminder in 10 seconds
+        setTimeout(() => {
+            notificationService.showNotification(
+                'تذكير تجريبي',
+                'هذا تذكير تجريبي تم جدولته منذ 10 ثوانٍ 🕐',
+                { requireInteraction: true }
+            );
+        }, 10000);
+        
+        logMessage('⏰ تم جدولة تذكير تجريبي لظهوره خلال 10 ثوانٍ');
+    }
+}
+
+function clearAllScheduled() {
+    if (notificationService) {
+        notificationService.scheduledNotifications.forEach(timeoutId => clearTimeout(timeoutId));
+        notificationService.scheduledNotifications.clear();
+        refreshStats();
+        logMessage('🗑️ تم مسح جميع التنبيهات المجدولة');
+    }
+}
+
+function exportSettings() {
+    if (notificationService) {
+        const settings = {
+            reminders: notificationService.getReminderSettings(),
+            stats: notificationService.getNotificationStats(),
+            timestamp: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(settings, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'islamic-notifications-settings.json';
+        link.click();
+        
+        logMessage('💾 تم تصدير إعدادات التنبيهات');
+    }
+}
+
+function resetToDefaults() {
+    if (confirm('هل تريد إعادة تعيين جميع إعدادات التنبيهات للقيم الافتراضية؟')) {
+        localStorage.removeItem('islamicReminders');
+        localStorage.removeItem('islamicNotificationsInit');
+        location.reload();
+        logMessage('🔄 تم إعادة تعيين الإعدادات للقيم الافتراضية');
+    }
+}
+
+function setupLogCapture() {
+    // Capture console messages related to notifications
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    console.log = function(...args) {
+        originalLog.apply(console, args);
+        if (args.some(arg => typeof arg === 'string' && (arg.includes('notification') || arg.includes('prayer')))) {
+            logMessage(`📝 ${args.join(' ')}`);
+        }
+    };
+}
+
+function logMessage(message) {
+    const timestamp = new Date().toLocaleTimeString('ar-SA');
+    notificationLog.unshift(`[${timestamp}] ${message}`);
+    
+    // Keep only last 50 messages
+    if (notificationLog.length > 50) {
+        notificationLog = notificationLog.slice(0, 50);
+    }
+    
+    updateLogDisplay();
+}
+
+function updateLogDisplay() {
+    const logDiv = document.getElementById('notificationLog');
+    logDiv.innerHTML = notificationLog.map(entry => 
+        `<div class="log-entry">${entry}</div>`
+    ).join('');
+}
+
+function clearLog() {
+    notificationLog = [];
+    updateLogDisplay();
+}
+</script>
+{% endblock %}
