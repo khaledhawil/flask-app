@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: islamic-flask-app
-        image: islamic-flask-app:latest
+        image: khaledhawil/flask-app:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
