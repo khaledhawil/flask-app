@@ -1,0 +1,68 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: islamic-app-ingress
+  namespace: islamic-app
+  labels:
+    app: islamic-flask-app
+  annotations:
+    # NGINX Ingress Controller annotations
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # Optional: Enable HTTPS redirect
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Optional: Certificate management with cert-manager
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Optional: Rate limiting
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  rules:
+  - host: islamic-app.example.com  # Change this to your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: islamic-app-service
+            port:
+              number: 5000
+  # Optional: TLS configuration
+  # tls:
+  # - hosts:
+  #   - islamic-app.example.com
+  #   secretName: islamic-app-tls
+---
+# Alternative Ingress for Traefik (comment out NGINX version above if using this)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: islamic-app-ingress-traefik
+  namespace: islamic-app
+  labels:
+    app: islamic-flask-app
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/rule-type: "PathPrefixStrip"
+    # Optional: Traefik rate limiting
+    traefik.ingress.kubernetes.io/rate-limit: |
+      extractorfunc: client.ip
+      rateset:
+        rate1:
+          period: 1m
+          average: 100
+          burst: 200
+spec:
+  rules:
+  - host: islamic-app.example.com  # Change this to your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: islamic-app-service
+            port:
+              number: 5000

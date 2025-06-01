@@ -1,0 +1,52 @@
+apiVersion: policy/v1
+kind: NetworkPolicy
+metadata:
+  name: islamic-app-network-policy
+  namespace: islamic-app
+  labels:
+    app: islamic-flask-app
+spec:
+  podSelector:
+    matchLabels:
+      app: islamic-flask-app
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx  # Allow ingress controller
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring     # Allow monitoring
+    - podSelector:
+        matchLabels:
+          app: islamic-flask-app  # Allow pod-to-pod communication
+    ports:
+    - protocol: TCP
+      port: 5000
+  egress:
+  - to: []  # Allow all outbound traffic (for API calls, etc.)
+    ports:
+    - protocol: TCP
+      port: 53    # DNS
+    - protocol: UDP
+      port: 53    # DNS
+    - protocol: TCP
+      port: 80    # HTTP
+    - protocol: TCP
+      port: 443   # HTTPS
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: islamic-app-pdb
+  namespace: islamic-app
+  labels:
+    app: islamic-flask-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: islamic-flask-app

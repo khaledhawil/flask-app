@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: islamic-app-config
+  namespace: islamic-app
+  labels:
+    app: islamic-flask-app
+data:
+  FLASK_APP: "src/app.py"
+  FLASK_ENV: "production"
+  SECRET_KEY: "your-production-secret-key-change-me"
+  PYTHONPATH: "/app/src"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  # Database configuration
+  DATABASE_PATH: "/app/data/app.db"
+  # Application settings
+  DEBUG: "false"
+  TESTING: "false"

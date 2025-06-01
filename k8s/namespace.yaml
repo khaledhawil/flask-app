@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: islamic-app
+  labels:
+    name: islamic-app
+    app: islamic-flask-app
