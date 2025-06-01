@@ -1,194 +1,0 @@
-{% extends "base.html" %}
-
-{% block title %}سياسة الخصوصية - Privacy Policy{% endblock %}
-
-{% block styles %}
-<style>
-    .privacy-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
-        background: var(--card-bg);
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        direction: rtl;
-        text-align: right;
-    }
-
-    .privacy-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        color: var(--primary-color);
-    }
-
-    .privacy-header h1 {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        font-family: 'Amiri', serif;
-    }
-
-    .privacy-section {
-        margin-bottom: 2.5rem;
-        padding: 1.5rem;
-        background: var(--background-color);
-        border-radius: 10px;
-        border-right: 4px solid var(--primary-color);
-    }
-
-    .privacy-section h2 {
-        color: var(--primary-color);
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-        font-family: 'Cairo', sans-serif;
-    }
-
-    .privacy-section p {
-        line-height: 1.8;
-        margin-bottom: 1rem;
-        color: var(--text-color);
-    }
-
-    .privacy-section ul {
-        list-style-type: none;
-        padding-right: 1.5rem;
-    }
-
-    .privacy-section ul li {
-        margin-bottom: 0.8rem;
-        position: relative;
-    }
-
-    .privacy-section ul li::before {
-        content: "•";
-        color: var(--primary-color);
-        font-weight: bold;
-        position: absolute;
-        right: -1rem;
-    }
-
-    .contact-info {
-        background: linear-gradient(135deg, var(--primary-color), #2980b9);
-        color: white;
-        text-align: center;
-        padding: 2rem;
-        border-radius: 10px;
-        margin-top: 2rem;
-    }
-
-    .back-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: var(--primary-color);
-        color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 25px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        margin-bottom: 2rem;
-    }
-
-    .back-btn:hover {
-        background: #2980b9;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="privacy-container">
-    <a href="/" class="back-btn">
-        <span>🏠</span>
-        العودة للرئيسية
-    </a>
-
-    <div class="privacy-header">
-        <h1>سياسة الخصوصية</h1>
-        <p>نحن نهتم بخصوصيتك ونحترم بياناتك الشخصية</p>
-    </div>
-
-    <div class="privacy-section">
-        <h2>📱 عن التطبيق</h2>
-        <p>
-            التطبيق الإسلامي الشامل هو تطبيق مجاني يهدف إلى مساعدة المسلمين في ممارسة عبادتهم اليومية 
-            وتذكر الله سبحانه وتعالى من خلال الأذكار والتسبيح وقراءة القرآن الكريم.
-        </p>
-    </div>
-
-    <div class="privacy-section">
-        <h2>🔒 البيانات التي نجمعها</h2>
-        <p>نحن نجمع الحد الأدنى من البيانات اللازمة لتشغيل التطبيق:</p>
-        <ul>
-            <li>اسم المستخدم وكلمة المرور للحسابات المسجلة</li>
-            <li>إحصائيات استخدام الأذكار والتسبيح (لحفظ التقدم)</li>
-            <li>الموقع الجغرافي (لحساب أوقات الصلاة فقط)</li>
-            <li>تفضيلات المستخدم والإعدادات</li>
-        </ul>
-    </div>
-
-    <div class="privacy-section">
-        <h2>🛡️ كيف نحمي بياناتك</h2>
-        <ul>
-            <li>جميع كلمات المرور محفوظة بشكل مشفر</li>
-            <li>البيانات محفوظة محلياً على جهازك أولاً</li>
-            <li>النسخ الاحتياطي للبيانات مشفر ومحمي</li>
-            <li>لا نشارك بياناتك مع أطراف ثالثة</li>
-            <li>يمكنك حذف حسابك وبياناتك في أي وقت</li>
-        </ul>
-    </div>
-
-    <div class="privacy-section">
-        <h2>🎯 استخدام البيانات</h2>
-        <p>نستخدم بياناتك فقط لـ:</p>
-        <ul>
-            <li>حفظ تقدمك في الأذكار والتسبيح</li>
-            <li>حساب أوقات الصلاة حسب موقعك</li>
-            <li>تقديم تجربة مخصصة لك</li>
-            <li>إظهار إحصائيات تقدمك الروحي</li>
-        </ul>
-    </div>
-
-    <div class="privacy-section">
-        <h2>🌐 البيانات المحلية</h2>
-        <p>
-            معظم بياناتك محفوظة محلياً على جهازك، مما يعني أنها لا تغادر جهازك إلا إذا اخترت 
-            إنشاء حساب لمزامنة البيانات عبر الأجهزة.
-        </p>
-    </div>
-
-    <div class="privacy-section">
-        <h2>📋 حقوقك</h2>
-        <ul>
-            <li>الوصول إلى بياناتك الشخصية</li>
-            <li>تعديل أو تصحيح بياناتك</li>
-            <li>حذف حسابك وجميع بياناتك</li>
-            <li>تصدير بياناتك بصيغة JSON</li>
-            <li>إيقاف جمع البيانات في أي وقت</li>
-        </ul>
-    </div>
-
-    <div class="privacy-section">
-        <h2>🔄 تحديثات السياسة</h2>
-        <p>
-            قد نحدث هذه السياسة من وقت لآخر. سنقوم بإشعارك بأي تغييرات مهمة 
-            عبر التطبيق أو البريد الإلكتروني إذا قدمته.
-        </p>
-    </div>
-
-    <div class="privacy-section">
-        <h2>🍪 ملفات الارتباط (Cookies)</h2>
-        <p>
-            نستخدم ملفات الارتباط الأساسية فقط للحفاظ على جلسة تسجيل الدخول 
-            وحفظ تفضيلاتك. لا نستخدم ملفات ارتباط للتتبع أو الإعلانات.
-        </p>
-    </div>
-
-    <div class="contact-info">
-        <h2>📞 تواصل معنا</h2>
-        <p>إذا كان لديك أي أسئلة حول سياسة الخصوصية، يرجى التواصل معنا:</p>
-        <p><strong>البريد الإلكتروني:</strong> privacy@islamic-app.com</p>
-        <p><strong>آخر تحديث:</strong> {{ "2025-05-29" }}</p>
-    </div>
-</div>
-{% endblock %}

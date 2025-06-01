@@ -1,42 +1,0 @@
-{% extends "base.html" %}
-
-{% block title %}صفحة تجربة المظهر - Theme Demo{% endblock %}
-
-{% block content %}
-<div class="header" style="text-align: center; margin: 40px 0;">
-    <h1 style="font-size: 3em; margin-bottom: 20px;">تجربة تبديل المظهر</h1>
-    <p style="font-size: 1.2em;">هذه صفحة بسيطة لتجربة تبديل المظهر بين الوضعين الداكن والفاتح</p>
-</div>
-
-<div style="max-width: 800px; margin: 0 auto; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 20px;">
-    <h2>كيفية استخدام المظهر المفضل لديك</h2>
-    <p style="margin: 20px 0; line-height: 1.6;">
-        يمكنك الضغط على زر تبديل المظهر 🌙/☀️ في أعلى الصفحة للتبديل بين المظهرين الداكن والفاتح.
-        سيتم حفظ اختيارك تلقائياً وتطبيقه في جميع صفحات التطبيق.
-    </p>
-    
-    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 30px;">
-        <div style="flex: 1; background: rgba(255,255,255,0.2); padding: 20px; border-radius: 15px;">
-            <h3>المظهر الداكن</h3>
-            <ul style="margin: 15px 0 15px 20px;">
-                <li>مريح للعين في الإضاءة المنخفضة</li>
-                <li>يوفر طاقة البطارية على بعض الأجهزة</li>
-                <li>مثالي للاستخدام الليلي</li>
-            </ul>
-        </div>
-        
-        <div style="flex: 1; background: rgba(255,255,255,0.2); padding: 20px; border-radius: 15px;">
-            <h3>المظهر الفاتح</h3>
-            <ul style="margin: 15px 0 15px 20px;">
-                <li>تباين أعلى للنصوص</li>
-                <li>مناسب للقراءة في الإضاءة العالية</li>
-                <li>مظهر تقليدي مألوف</li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<div style="text-align: center; margin-top: 40px;">
-    <a href="{{ url_for('home') }}" style="display: inline-block; padding: 12px 30px; background: rgba(255,255,255,0.2); color: currentColor; text-decoration: none; border-radius: 30px; transition: all 0.3s ease;">العودة للصفحة الرئيسية</a>
-</div>
-{% endblock %}
