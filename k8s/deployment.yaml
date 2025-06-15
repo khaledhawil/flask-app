@@ -40,7 +40,7 @@ spec:
           mountPath: /app/data
         livenessProbe:
           httpGet:
-            path: /
+            path: /api/health
             port: 5000
           initialDelaySeconds: 30
           periodSeconds: 10
@@ -48,7 +48,7 @@ spec:
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /
+            path: /api/health
             port: 5000
           initialDelaySeconds: 10
           periodSeconds: 5
@@ -66,7 +66,7 @@ spec:
           "--access-logfile", "-",
           "--error-logfile", "-",
           "--log-level", "info",
-          "src.app:app"
+          "app:app"
         ]
       volumes:
       - name: app-data
